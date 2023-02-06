@@ -1,0 +1,10 @@
+int numb = 0;
+
+while(numb <200+200){
+
+print(numb);
+set numb = numb +1;
+
+}
+
+if( numb  !== 200){ print(1);}

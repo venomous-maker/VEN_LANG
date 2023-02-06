@@ -1,0 +1,6 @@
+<program>
+    <bin op = "%">
+        <int>8</int>
+        <int>5</int>
+    </bin>
+</program>
