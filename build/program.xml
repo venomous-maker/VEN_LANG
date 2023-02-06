@@ -1,6 +1,17 @@
 <program>
-    <bin op = "%">
-        <int>8</int>
-        <int>5</int>
-    </bin>
+    <if>
+        <condition>
+            <bin op = "==">
+                <id>name</id>
+                <int>100</int>
+            </bin>
+        </condition>
+        <if-block>
+            <block>
+                <print>
+                    <bool>true</bool>
+                </print>
+            </block>
+        </if-block>
+    </if>
 </program>

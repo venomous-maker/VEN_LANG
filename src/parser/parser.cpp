@@ -168,7 +168,7 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
     identifier = current_token.value;
 
     consume_token();
-    if(current_token.type != lexer::TOK_COLON && current_token.type != lexer::TOK_EQUALS && current_token.value != "= "/* Some chars maybe taken more than =*/)
+    if(current_token.type != lexer::TOK_COLON && current_token.type != lexer::TOK_EQUALS && current_token.value != "="/* Some chars maybe taken more than =*/)
         throw std::runtime_error("Expected assignment operator '=' or ':' after " + identifier + " on line "
                                  + std::to_string(current_token.line_number) + ".");
 
@@ -504,6 +504,17 @@ ASTExprNode* Parser::parse_expression() {
         }
         return new ASTUnaryExprNode(current_token.value, parse_expression(), line_number);
     }
+    if(next_token.value == "is"){
+        consume_token();
+        //cout << next_token.value << endl;
+        if(next_token.type == lexer::TOK_NOT)
+        {
+            consume_token();
+            return new ASTBinaryExprNode("!=", simple_expr, parse_expression(), line_number);
+        }
+        return new ASTBinaryExprNode("==", simple_expr, parse_expression(), line_number);
+    }
+
     if(next_token.type == lexer::TOK_RELATIONAL_OP) {
         consume_token();
         return new ASTBinaryExprNode(current_token.value, simple_expr, parse_expression(), line_number);
