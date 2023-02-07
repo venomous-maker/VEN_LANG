@@ -1,17 +1,21 @@
 <program>
     <if>
         <condition>
-            <bin op = "==">
-                <id>name</id>
-                <int>100</int>
-            </bin>
+            <bool>false</bool>
         </condition>
         <if-block>
             <block>
                 <print>
-                    <bool>true</bool>
+                    <int>1</int>
                 </print>
             </block>
         </if-block>
+    <else-block>
+        <block>
+            <print>
+                <int>4</int>
+            </print>
+        </block>
+    </else-block>
     </if>
 </program>

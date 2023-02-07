@@ -17,6 +17,7 @@ public:
     static visitor::SemanticScope semantic_global_scope;
     static visitor::InterpreterScope interpreter_global_scope;
     static std::string program;
+    static std::string global_print_val;
 	static std::string import_program;
     static parser::ASTProgramNode *prog;
     static parser::ASTExprNode *global_simple_expr;

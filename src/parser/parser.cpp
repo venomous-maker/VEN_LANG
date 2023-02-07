@@ -187,6 +187,7 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
 ASTPrintNode* Parser::parse_print_statement() {
 
     // Determine line number
+    global::global_print_val = removewhiteEnd(current_token.value);
     unsigned int line_number = current_token.line_number;
 	std::string identifier = current_token.value;
 	consume_token();
@@ -294,6 +295,10 @@ ASTIfNode* Parser::parse_if_statement() {
     //Node attributes
     ASTExprNode* condition;
     ASTBlockNode* if_block;
+    ASTExprNode** else_condition = nullptr;
+    ASTBlockNode** else_if_block = nullptr;
+    ASTExprNode** temp_else_condition = nullptr;
+    ASTBlockNode** temp_else_if_block = nullptr;
     unsigned int line_number = current_token.line_number;
 
     // Consume '('
@@ -320,14 +325,83 @@ ASTIfNode* Parser::parse_if_statement() {
 
     // Consume if-block and '}'
     if_block = parse_block();
-
+    int i = 0;
+    
     // Lookahead whether there is an else
     if(next_token.type != lexer::TOK_ELSE)
         return new ASTIfNode(condition, if_block, line_number);
 
     // Otherwise, consume the else
     consume_token();
+    /**
+     *@memory_allocation if else if statement is foreseen.
+     */
+    if(next_token.type == lexer::TOK_IF){
+        else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i+1));
+        else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i+1));
+    }
+    
+    while(next_token.type == lexer::TOK_IF){
+        
+        consume_token();
+        // Consume '('
+        consume_token();
+        if(current_token.type != lexer::TOK_LEFT_BRACKET)
+            throw std::runtime_error("Expected '(' after 'if' on line " +
+                                    std::to_string(current_token.line_number) + ".");
 
+        // Parse the expression
+        else_condition[i] = parse_expression();
+        global::global_simple_expr = else_condition[i];
+
+        // Consume ')'
+        consume_token();
+        if(current_token.type != lexer::TOK_RIGHT_BRACKET)
+            throw std::runtime_error("Expected ')' after if-condition on line " +
+                                    std::to_string(current_token.line_number) + ".");
+
+        // Consume '{'
+        consume_token();
+        if(current_token.type != lexer::TOK_LEFT_CURLY)
+            throw std::runtime_error("Expected '{' after if-condition on line " +
+                                    std::to_string(current_token.line_number) + ".");
+
+        // Consume if-block and '}'
+        else_if_block[i] = parse_block();
+
+        // Lookahead whether there is an else
+        if(next_token.type != lexer::TOK_ELSE)
+            return new ASTIfNode(condition, if_block, line_number, else_if_block, else_condition);
+        else  // Otherwise, consume the else
+            consume_token();
+        // foresee if
+        if(next_token.type == lexer::TOK_IF){
+            i = i + 1;
+            // Memory swapping
+            // Allocate memory size for temp = real
+            temp_else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i-1));
+            temp_else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i-1));
+            // Assign
+            temp_else_condition = else_condition;
+            temp_else_if_block = else_if_block;
+            // Allocate new memory for block and condition pointers
+            else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i));
+            else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i));
+            int j = 0;
+            // Swapp
+            while(temp_else_condition[j]){
+                else_condition[j] = temp_else_condition[j];
+                else_if_block[j] = temp_else_if_block[j];
+                ++j;
+            }
+            
+        }
+    }
+    // Releasing temporary memory allocation
+    if(temp_else_condition){
+        free(temp_else_condition);
+        free(temp_else_if_block);
+    }
     // Consume '{' after else
     consume_token();
     if(current_token.type != lexer::TOK_LEFT_CURLY)
@@ -338,7 +412,7 @@ ASTIfNode* Parser::parse_if_statement() {
     ASTBlockNode* else_block = parse_block();
 
     // Return if node
-    return new ASTIfNode(condition, if_block, line_number, else_block);
+    return new ASTIfNode(condition, if_block, line_number, else_if_block, else_condition, else_block);
 }
 
 ASTWhileNode* Parser::parse_while_statement() {

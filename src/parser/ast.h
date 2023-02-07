@@ -90,9 +90,11 @@ namespace parser {
 
     class ASTIfNode : public ASTStatementNode {
     public:
-        ASTIfNode(ASTExprNode*, ASTBlockNode*, unsigned int, ASTBlockNode* = nullptr);
+        ASTIfNode(ASTExprNode* condition, ASTBlockNode* if_block, unsigned int line_number, ASTBlockNode** else_if_block = nullptr, ASTExprNode **else_if_conditions = nullptr, ASTBlockNode* else_block = nullptr);
         ASTExprNode *condition;
+        ASTExprNode **else_if_conditions;
         ASTBlockNode *if_block;
+        ASTBlockNode **else_if_block;
         ASTBlockNode *else_block;
         unsigned int line_number;
         void accept(visitor::Visitor*) override;

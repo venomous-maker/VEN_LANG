@@ -18,6 +18,9 @@ namespace parser {
             Parser(lexer::Lexer*, unsigned int);
             ASTProgramNode* parse_program();
             ASTExprNode* parse_expression();  // public for repl
+            std::string removelastSpace(std::string str) {
+                return removewhiteEnd(str);
+            }
 
         private:
 

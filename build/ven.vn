@@ -1,10 +1,13 @@
-int numb = 0;
+if(false){
 
-while(numb <200+200){
+print(1);
 
-print(numb);
-set numb = numb +1;
-
+}else if(false){
+print(2);
+}else if(false){
+print(3);
 }
+else{
 
-if( numb  !== 200){ print(1);}
+print(4);
+}

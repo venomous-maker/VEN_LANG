@@ -50,12 +50,14 @@ ASTBlockNode::ASTBlockNode(std::vector<ASTStatementNode*> statements, unsigned i
         line_number(line_number)
 {}
 
-ASTIfNode::ASTIfNode(ASTExprNode* condition, ASTBlockNode *if_block, unsigned int line_number,
+ASTIfNode::ASTIfNode(ASTExprNode* condition, ASTBlockNode *if_block, unsigned int line_number,ASTBlockNode** else_if_block, ASTExprNode **else_if_conditions, 
                      ASTBlockNode *else_block) :
         condition(condition),
+        else_if_conditions(else_if_conditions),
         if_block(if_block),
-        line_number(line_number),
-        else_block(else_block)
+        else_if_block(else_if_block),
+        else_block(else_block), 
+        line_number(line_number)
 {}
 
 ASTWhileNode::ASTWhileNode(ASTExprNode *condition, ASTBlockNode *block, unsigned int line_number) :

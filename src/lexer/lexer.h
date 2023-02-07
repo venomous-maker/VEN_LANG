@@ -3,7 +3,7 @@
  * Contains the implementation of the table-driven lexer.
  * @author Luke Collins
  * @date 5/3/2018
- * @update by venom on printable Lexers
+ * @update by @morgan on printable Lexers
  */
 #ifndef VENOM_LEXER_H
 #define VENOM_LEXER_H

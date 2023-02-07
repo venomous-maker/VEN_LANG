@@ -1,19 +1,8 @@
-//
-// Created by Morgan OKumu.
-//Updated by VENOM on 10/11/22 added more binary operators, fmod, power
-//Update done to return float where n/m and m>n, n^m where m <0
-//
-/*#include <fstream>
-#include <regex>
-#include <iomanip>
-
-//#include "../lexer/lexer.h"
-#include "../parser/parser.h"
-#include "../visitor/xml_visitor.h"
-#include "../visitor/semantic_analysis.h"
-
-//#include "../visitor/interpreter.h"
-//#include "../table/table.h"*/
+/**
+* @author Morgan OKumu.
+* @update by VENOM on 10/11/22 added more binary operators, fmod, power
+* @update done to return float where n/m and m>n, n^m where m <0
+*/
 #include "../inclussion.h"
 using namespace std;
 #include <iostream>
@@ -242,6 +231,7 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
             std::cout << current_expression_value.s;
             break;
     }
+    if(global::global_print_val != "printf")
     std:cout<<"\n";
 }
 void file_include(std::string fileargs);
@@ -299,11 +289,28 @@ void visitor::Interpreter::visit(parser::ASTIfNode *ifNode) {
 
     // Evaluate if condition
     ifNode -> condition -> accept(this);
-
+    // Captures execution in else if to make else statement reachable
+    bool in_else_if = false;
     // Execute appropriate blocks
     if(current_expression_value.b)
         ifNode -> if_block -> accept(this);
-    else{
+    if(ifNode -> else_if_block){
+        // else if statements
+        int i = 0;
+        while(ifNode->else_if_block[i]){
+            ifNode->else_if_conditions[i] -> accept(this);
+            // Execute appropriate blocks
+            if(current_expression_value.b){
+                // Else if is reached
+                in_else_if = true;
+                ifNode -> else_if_block[i] ->accept(this);
+                break;
+            }
+            ++i;
+        }
+    }
+    // If else-if is not executed proceed to else
+    if(!in_else_if){
         if(ifNode -> else_block)
             ifNode -> else_block -> accept(this);
     }

@@ -1,7 +1,7 @@
-//
-// Copyright Lukec
-// Created by Morgan Okumu on 11/11/22.
-//
+/**
+* @Copyright Lukec
+* @Created by Morgan Okumu on 11/11/22.
+*/
 
 #include "semantic_analysis.h"
 #include <utility>
@@ -237,7 +237,7 @@ void SemanticAnalyser::visit(parser::ASTBlockNode *block) {
 
 void SemanticAnalyser::visit(parser::ASTIfNode *ifnode) {
 
-    // Set current type to while expression
+    // Set current type to if expression
     ifnode -> condition -> accept(this);
 
     // Make sure it is boolean
@@ -247,10 +247,27 @@ void SemanticAnalyser::visit(parser::ASTIfNode *ifnode) {
 
     // Check the if block
     ifnode -> if_block -> accept(this);
-
+    
+    /**
+     * @else_if statements
+     */
+    if(ifnode->else_if_block){
+        int i = 0;
+        while(ifnode->else_if_block[i]){
+            ifnode->else_if_conditions[i] -> accept(this);
+            // Make sure it is boolean
+            if(current_expression_type != parser::BOOL)
+                throw std::runtime_error("Invalid else if-condition on line " + std::to_string(ifnode -> line_number)
+                                        + ", expected boolean expression.");
+            // Check the if block
+            ifnode -> else_if_block[i] ->accept(this);
+            ++i;
+        }
+    }
     // If there is an else block, check it too
-    if(ifnode -> else_block)
+    if(ifnode -> else_block){
         ifnode -> else_block -> accept(this);
+    }
 
 }
 
