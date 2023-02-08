@@ -120,12 +120,22 @@ void ASTBinaryExprNode::accept(visitor::Visitor *v){
 namespace parser {
 
     template<>
-    void ASTLiteralNode<int>::accept(visitor::Visitor *v) {
+    void ASTLiteralNode<long int>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+    
+    template<>
+    void ASTLiteralNode<long int*>::accept(visitor::Visitor *v) {
         v->visit(this);
     }
 
     template<>
-    void ASTLiteralNode<float>::accept(visitor::Visitor *v) {
+    void ASTLiteralNode<long double>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+    
+     template<>
+    void ASTLiteralNode<long double*>::accept(visitor::Visitor *v) {
         v->visit(this);
     }
 
@@ -133,9 +143,18 @@ namespace parser {
     void ASTLiteralNode<bool>::accept(visitor::Visitor *v) {
         v->visit(this);
     }
+    
+    template<>
+    void ASTLiteralNode<bool*>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
 
     template<>
     void ASTLiteralNode<std::string>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+    template<>
+    void ASTLiteralNode<std::string*>::accept(visitor::Visitor *v) {
         v->visit(this);
     }
 }

@@ -19,6 +19,7 @@ Token::Token(int final_state, std::string value, unsigned int line_number) :
 {}
 
 TOKEN Token::determine_token_type(int final_state, std::string &value) {
+    //std::cout <<  final_state << std::endl;
     switch(final_state) {
         case 1:
             return TOK_INT;
@@ -43,6 +44,8 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
 
         case 9:
             if (value ==  "$") return TOK_SET;
+            else if (value == "[") return TOK_LEFT_SQUARE_BRACKET;
+            else if (value == "]") return TOK_RIGHT_BRACKET;
             else return TOK_RELATIONAL_OP;
 
         case 10:

@@ -13,11 +13,15 @@
 namespace visitor {
 
     typedef struct vT {
-        vT() : i(0), r(0), b(0), s("") {};
-        int i;
-        float r;
+        vT() : i(0), r(0), b(0), s(""), i_(nullptr), r_(nullptr), b_(nullptr), s_(nullptr) {};
+        long int i;
+        long double r;
         bool b;
         std::string s;
+        long int *i_;
+        long double *r_;
+        bool* b_;
+        std::string *s_;
     } value_t;
 
 
@@ -26,10 +30,14 @@ namespace visitor {
 
         bool already_declared(std::string);
         bool already_declared(std::string, std::vector<parser::TYPE>);
-        void declare(std::string, int);
-        void declare(std::string, float);
+        void declare(std::string, long int);
+        void declare(std::string, long double);
         void declare(std::string, bool);
         void declare(std::string, std::string);
+        void declare(std::string, long int*);
+        void declare(std::string, long double*);
+        void declare(std::string, bool*);
+        void declare(std::string, std::string*);
         void declare(std::string, std::vector<parser::TYPE>, std::vector<std::string>,
                 parser::ASTBlockNode*);
 		void file_include(std::string fileargs);
@@ -68,10 +76,14 @@ namespace visitor {
         void visit(parser::ASTIfNode*) override;
         void visit(parser::ASTWhileNode*) override;
         void visit(parser::ASTFunctionDefinitionNode*) override;
-        void visit(parser::ASTLiteralNode<int>*) override;
-        void visit(parser::ASTLiteralNode<float>*) override;
+        void visit(parser::ASTLiteralNode<long int>*) override;
+        void visit(parser::ASTLiteralNode<long double>*) override;
         void visit(parser::ASTLiteralNode<bool>*) override;
         void visit(parser::ASTLiteralNode<std::string>*) override;
+        void visit(parser::ASTLiteralNode<long int*>*) override;
+        void visit(parser::ASTLiteralNode<long double*>*) override;
+        void visit(parser::ASTLiteralNode<bool*>*) override;
+        void visit(parser::ASTLiteralNode<std::string*>*) override;
         void visit(parser::ASTBinaryExprNode*) override;
         void visit(parser::ASTIdentifierNode*) override;
         void visit(parser::ASTUnaryExprNode*) override;

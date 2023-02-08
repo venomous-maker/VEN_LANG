@@ -12,7 +12,7 @@
 namespace parser {
 
     // TypeZ
-    enum TYPE {INT, REAL, BOOL, STRING, ARRAY_INT, REAL_ARRAY, BOOL_ARRAY, STRING_ARRAY};
+    enum TYPE {INT, REAL, BOOL, STRING, INT_ARR, REAL_ARR, BOOL_ARR,  STRING_ARR};
 
     // Abstract Nodes
     class ASTNode {

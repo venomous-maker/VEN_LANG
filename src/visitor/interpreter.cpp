@@ -33,13 +33,13 @@ bool InterpreterScope::already_declared(std::string identifier, std::vector<pars
     return false;
 }
 
-void InterpreterScope::declare(std::string identifier, int int_value) {
+void InterpreterScope::declare(std::string identifier, long int int_value) {
     value_t value;
     value.i = int_value;
     variable_symbol_table[identifier] = std::make_pair(parser::INT, value);
 }
 
-void InterpreterScope::declare(std::string identifier, float real_value) {
+void InterpreterScope::declare(std::string identifier, long double real_value) {
     value_t value;
     value.r = real_value;
     variable_symbol_table[identifier] = std::make_pair(parser::REAL, value);
@@ -56,7 +56,30 @@ void InterpreterScope::declare(std::string identifier, std::string string_value)
     value.s = string_value;
     variable_symbol_table[identifier] = std::make_pair(parser::STRING, value);
 }
+// Arrays
+void InterpreterScope::declare(std::string identifier, long int* int_value) {
+    value_t value;
+    value.i_ = int_value;
+    variable_symbol_table[identifier] = std::make_pair(parser::INT_ARR, value);
+}
 
+void InterpreterScope::declare(std::string identifier, long double* real_value) {
+    value_t value;
+    value.r_ = real_value;
+    variable_symbol_table[identifier] = std::make_pair(parser::REAL_ARR, value);
+}
+
+void InterpreterScope::declare(std::string identifier, bool* bool_value) {
+    value_t value;
+    value.b_ = bool_value;
+    variable_symbol_table[identifier] = std::make_pair(parser::BOOL_ARR, value);
+}
+
+void InterpreterScope::declare(std::string identifier, std::string* string_value) {
+    value_t value;
+    value.s_ = string_value;
+    variable_symbol_table[identifier] = std::make_pair(parser::STRING_ARR, value);
+}
 void InterpreterScope::declare(std::string identifier, std::vector<parser::TYPE> signature,
                                std::vector<std::string> variable_names, parser::ASTBlockNode* block) {
 
@@ -161,7 +184,7 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
         case parser::REAL:
             if(current_expression_type == parser::INT)
                 scopes.back()->declare(decl->identifier,
-                                       (float)current_expression_value.i);
+                                       (long double)current_expression_value.i);
             else
                 scopes.back()->declare(decl->identifier,
                                         current_expression_value.r);
@@ -195,7 +218,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
         case parser::REAL:
             if(current_expression_type == parser::INT)
                 scopes[i]->declare(assign->identifier,
-                                   (float) current_expression_value.i);
+                                   (long double) current_expression_value.i);
             else
                 scopes[i]->declare(assign->identifier,
                                    current_expression_value.r);
@@ -340,14 +363,14 @@ void visitor::Interpreter::visit(parser::ASTFunctionDefinitionNode *func) {
 
 }
 
-void visitor::Interpreter::visit(parser::ASTLiteralNode<int> *lit) {
+void visitor::Interpreter::visit(parser::ASTLiteralNode<long int> *lit) {
     value_t v;
     v.i = lit->val;
     current_expression_type = parser::INT;
     current_expression_value = std::move(v);
 }
 
-void visitor::Interpreter::visit(parser::ASTLiteralNode<float> *lit) {
+void visitor::Interpreter::visit(parser::ASTLiteralNode<long double> *lit) {
     value_t v;
     v.r = lit->val;
     current_expression_type = parser::REAL;
@@ -365,6 +388,34 @@ void visitor::Interpreter::visit(parser::ASTLiteralNode<std::string> *lit) {
     value_t v;
     v.s = lit->val;
     current_expression_type = parser::STRING;
+    current_expression_value = std::move(v);
+}
+
+void visitor::Interpreter::visit(parser::ASTLiteralNode<long int*> *lit) {
+    value_t v;
+    v.i_ = lit->val;
+    current_expression_type = parser::INT_ARR;
+    current_expression_value = std::move(v);
+}
+
+void visitor::Interpreter::visit(parser::ASTLiteralNode<long double*> *lit) {
+    value_t v;
+    v.r_ = lit->val;
+    current_expression_type = parser::REAL_ARR;
+    current_expression_value = std::move(v);
+}
+
+void visitor::Interpreter::visit(parser::ASTLiteralNode<bool*> *lit) {
+    value_t v;
+    v.b_ = lit->val;
+    current_expression_type = parser::BOOL_ARR;
+    current_expression_value = std::move(v);
+}
+
+void visitor::Interpreter::visit(parser::ASTLiteralNode<std::string*> *lit) {
+    value_t v;
+    v.s_ = lit->val;
+    current_expression_type = parser::STRING_ARR;
     current_expression_value = std::move(v);
 }
 
@@ -413,11 +464,11 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
 	    		throw std::runtime_error("Factorial limit greater than the parent value encountered on line "
                                              + std::to_string(bin->line_number) + ".");
 	    	}else{
-		    	int mini_val = 1;
-		    	float result = l_value.i;
+		    	long int mini_val = 1;
+		    	long double result = l_value.i;
 		    	if (r_value.i==0) mini_val = 1;
 		    	else mini_val = r_value.i;
-		    	for(float dec_res=result-1;dec_res>=mini_val;dec_res--){
+		    	for(long double dec_res=result-1;dec_res>=mini_val;dec_res--){
 		    		result = result* dec_res;
 		    	}
 		    	current_expression_type = parser::REAL;
@@ -433,8 +484,8 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
                 }
                 else{//Declare as float if values are not divisible
                 	current_expression_type = parser::REAL;
-                	float l = l_value.i;
-                	float r = r_value.i;
+                	long double l = l_value.i;
+                	long double r = r_value.i;
                 	v.r = l / r;
                 }
             }
@@ -442,7 +493,7 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
         // At least one real
         else if(l_type == parser::REAL || r_type == parser::REAL) {
             current_expression_type = parser::REAL;
-            float l = l_value.r, r = r_value.r;
+            long double l = l_value.r, r = r_value.r;
             if(l_type == parser::INT)
                 l = l_value.i;
             if(r_type == parser::INT)
@@ -462,11 +513,11 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
 	    		throw std::runtime_error("Factorial limit greater than the parent value encountered on line "
                                              + std::to_string(bin->line_number) + ".");
 	    	}else{
-	    	float mini_val = 1.0;
-	    	float result = l_value.r;
+	    	long double mini_val = 1.0;
+	    	long double result = l_value.r;
 	    	if (r_value.i==0) mini_val = 1.0;
 	    	else mini_val = r_value.r;
-	    	for(int dec_res=result-1.0;dec_res>=mini_val;dec_res--){
+	    	for(long int dec_res=result-1.0;dec_res>=mini_val;dec_res--){
 	    		result = result* dec_res;
 	    	}
 	    	v.r = result;
@@ -504,7 +555,7 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
                 v.b = (op == "==") ? l_value.s == r_value.s : l_value.s != r_value.s;
 
         else{
-            float l = l_value.r, r = r_value.r;
+           long double l = l_value.r, r = r_value.r;
             if(l_type == parser::INT)
                 l = l_value.i;
             if(r_type == parser::INT)

@@ -45,10 +45,14 @@ namespace visitor {
         virtual void visit(parser::ASTIfNode*) = 0;
         virtual void visit(parser::ASTWhileNode*) = 0;
         virtual void visit(parser::ASTFunctionDefinitionNode*) = 0;
-        virtual void visit(parser::ASTLiteralNode<int>*) = 0;
-        virtual void visit(parser::ASTLiteralNode<float>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<long int>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<long double>*) = 0;
         virtual void visit(parser::ASTLiteralNode<bool>*) = 0;
         virtual void visit(parser::ASTLiteralNode<std::string>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<long int*>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<long double*>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<bool*>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<std::string*>*) = 0;
         virtual void visit(parser::ASTBinaryExprNode*) = 0;
         virtual void visit(parser::ASTIdentifierNode*) = 0;
         virtual void visit(parser::ASTUnaryExprNode*) = 0;

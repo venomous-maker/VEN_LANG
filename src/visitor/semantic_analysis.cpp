@@ -332,11 +332,11 @@ void SemanticAnalyser::visit(parser::ASTFunctionDefinitionNode *func) {
     functions.pop();
 }
 
-void SemanticAnalyser::visit(parser::ASTLiteralNode<int>*) {
+void SemanticAnalyser::visit(parser::ASTLiteralNode<long int>*) {
     current_expression_type = parser::INT;
 }
 
-void SemanticAnalyser::visit(parser::ASTLiteralNode<float>*) {
+void SemanticAnalyser::visit(parser::ASTLiteralNode<long double>*) {
     current_expression_type = parser::REAL;
 }
 
@@ -346,6 +346,23 @@ void SemanticAnalyser::visit(parser::ASTLiteralNode<bool>*) {
 
 void SemanticAnalyser::visit(parser::ASTLiteralNode<std::string>*) {
     current_expression_type = parser::STRING;
+}
+
+
+void SemanticAnalyser::visit(parser::ASTLiteralNode<long int*>*) {
+    current_expression_type = parser::INT_ARR;
+}
+
+void SemanticAnalyser::visit(parser::ASTLiteralNode<long double*>*) {
+    current_expression_type = parser::REAL_ARR;
+}
+
+void SemanticAnalyser::visit(parser::ASTLiteralNode<bool*>*) {
+    current_expression_type = parser::BOOL_ARR;
+}
+
+void SemanticAnalyser::visit(parser::ASTLiteralNode<std::string*>*) {
+    current_expression_type = parser::STRING_ARR;
 }
 
 void SemanticAnalyser::visit(parser::ASTBinaryExprNode* bin) {

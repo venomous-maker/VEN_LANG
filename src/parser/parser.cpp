@@ -198,12 +198,13 @@ ASTPrintNode* Parser::parse_print_statement() {
     // Get expression to print
     ASTExprNode* expr = parse_expression();
     global::global_simple_expr = expr;
+    
 	consume_token();
 	// Make sure it's a ')'
     if(current_token.type != lexer::TOK_RIGHT_BRACKET)
-        throw std::runtime_error("Expected ')' after output expression on line "
-                                 + std::to_string(current_token.line_number) + ".");
-	identifier = current_token.value;
+        throw std::runtime_error("Expected ')' after output expression on line "+ 
+                                    std::to_string(current_token.line_number) + ".");
+    identifier = current_token.value;
     // Consume ';' token
     consume_token();
 
@@ -634,10 +635,10 @@ ASTExprNode* Parser::parse_factor() {
 
         // Literal Cases
         case lexer::TOK_INT:
-            return new ASTLiteralNode<int>(std::stoi(current_token.value), line_number);
+            return new ASTLiteralNode<long int>(std::stol(current_token.value), line_number);
 
         case lexer::TOK_REAL:
-            return new ASTLiteralNode<float>(std::stof(current_token.value), line_number);
+            return new ASTLiteralNode<long double>(std::stold(current_token.value), line_number);
 
         case lexer::TOK_BOOL:
             return new ASTLiteralNode<bool>(current_token.value == "true", line_number);

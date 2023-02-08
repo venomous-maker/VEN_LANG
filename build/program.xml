@@ -1,21 +1,8 @@
 <program>
-    <if>
-        <condition>
-            <bool>false</bool>
-        </condition>
-        <if-block>
-            <block>
-                <print>
-                    <int>1</int>
-                </print>
-            </block>
-        </if-block>
-    <else-block>
-        <block>
-            <print>
-                <int>4</int>
-            </print>
-        </block>
-    </else-block>
-    </if>
+    <unary op = "-">
+        <bin op = "^">
+            <int>2</int>
+            <real>2.400000</real>
+        </bin>
+    </unary>
 </program>

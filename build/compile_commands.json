@@ -1,0 +1,42 @@
+[
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/main.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/main.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/lexer/lexer.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/lexer/token.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/parser/parser.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/parser/ast.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp"
+},
+{
+  "directory": "/home/venom/Desktop/morgan/venom_interpreter/build",
+  "command": "g++-10   -g3 -std=gnu++11 -o CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp",
+  "file": "/home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp"
+}
+]

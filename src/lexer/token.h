@@ -53,6 +53,8 @@ namespace lexer {
         TOK_ERROR,
         TOK_INCLUDE,
         TOK_FOR,
+        TOK_RIGHT_SQUARE_BRACKET, 
+        TOK_LEFT_SQUARE_BRACKET
     };
 
     /**
