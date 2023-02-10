@@ -1,0 +1,15 @@
+<program>
+    <while>
+        <condition>
+            <bool>true</bool>
+        </condition>
+        <block>
+            <print>
+                <bin op = "+">
+                    <int>2</int>
+                    <int>1</int>
+                </bin>
+            </print>
+        </block>
+    </while>
+</program>
