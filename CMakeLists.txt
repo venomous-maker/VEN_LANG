@@ -4,8 +4,13 @@ project(venom)
 set(CMAKE_CXX_STANDARD 11)
 add_compile_options(-g3)
 
+<<<<<<< HEAD
 set(CMAKE_C_COMPILER "gcc-11")
 set(CMAKE_CXX_COMPILER "g++-11")
+=======
+set(CMAKE_C_COMPILER "gcc-10")
+set(CMAKE_CXX_COMPILER "g++-10")
+>>>>>>> origin/development
 
 add_executable(venom
         src/main.cpp

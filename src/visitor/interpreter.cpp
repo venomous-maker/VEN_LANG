@@ -106,7 +106,7 @@ std::vector<std::string> InterpreterScope::variable_names_of(std::string identif
     for (i = funcs.first; i != funcs.second; i++)
         if(std::get<0>(i->second) == signature)
             return std::get<1>(i->second);
-	return std::get<1>(i->second);
+    return std::get<1>(i->second);
 }
 
 parser::ASTBlockNode* InterpreterScope::block_of(std::string identifier, std::vector<parser::TYPE> signature) {
@@ -125,6 +125,7 @@ parser::ASTBlockNode* InterpreterScope::block_of(std::string identifier, std::ve
 std::vector<std::tuple<std::string, std::string, std::string>> InterpreterScope::variable_list() {
 
     std::vector<std::tuple<std::string, std::string, std::string>> list;
+    std::vector<std::tuple<std::string, std::string, std::string*>> list_array;
 
     for(auto const &var : variable_symbol_table)
         switch(var.second.first){
@@ -143,6 +144,86 @@ std::vector<std::tuple<std::string, std::string, std::string>> InterpreterScope:
             case parser::STRING:
                 list.emplace_back(std::make_tuple(
                         var.first, "string",  var.second.second.s));
+                break;
+            case parser::INT_ARR:
+            {
+                int size = 0;
+                std::string* result = nullptr;
+                std::string* result_temp = nullptr;
+                result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                while (var.second.second.i_[size]) {
+                    result[size] = std::to_string(var.second.second.i_[size]);
+                    if (var.second.second.i_[size+1]) {
+                        result_temp = result;
+                        ++size;
+                        result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                        int i = 0;
+                        while (i < size) {
+                            result[i] = result_temp[i];
+                            ++i;
+                        }
+                        free(result_temp);
+                    }
+                }
+                
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "int_array", result));
+                free(result);
+                break;
+            }
+            case parser::REAL_ARR:
+            {
+                int size = 0;
+                std::string* result = nullptr;
+                std::string* result_temp = nullptr;
+                result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                while (var.second.second.r_[size]) {
+                    result[size] = std::to_string(var.second.second.r_[size]);
+                    if (var.second.second.r_[size+1]) {
+                        result_temp = result;
+                        ++size;
+                        result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                        int i = 0;
+                        while (i < size) {
+                            result[i] = result_temp[i];
+                            ++i;
+                        }
+                        free(result_temp);
+                    }
+                }
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "float_array", result));
+                free(result);
+                break;
+            }
+            case parser::BOOL_ARR:
+            {
+                int size = 0;
+                std::string* result = nullptr;
+                std::string* result_temp = nullptr;
+                result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                while (var.second.second.b_[size]) {
+                    result[size] = (var.second.second.b_[size]) ? "true" : "false";
+                    if (var.second.second.i_[size+1]) {
+                        result_temp = result;
+                        ++size;
+                        result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                        int i = 0;
+                        while (i < size) {
+                            result[i] = result_temp[i];
+                            ++i;
+                        }
+                        free(result_temp);
+                    }
+                }
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "bool_array", result));
+                free(result);
+                break;
+            }
+            case parser::STRING_ARR:
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "string_array",  var.second.second.s_));
                 break;
         }
 
@@ -172,31 +253,201 @@ void visitor::Interpreter::visit(parser::ASTProgramNode *prog) {
 
 void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
 
-    // Visit expression to update current value/type
-    decl -> expr -> accept(this);
-
     // Declare variable, depending on type
-    switch(decl -> type){
-        case parser::INT:
-            scopes.back()->declare(decl->identifier,
-                                   current_expression_value.i);
-            break;
-        case parser::REAL:
-            if(current_expression_type == parser::INT)
+    if (decl->is_array) {
+        // IF ARRAY
+        switch(decl -> type){
+            case parser::INT:{
+                long int *values = nullptr;
+                long int *temp_values = nullptr;
+                
+                int size = 0;
+                // check if the first value occurs in the pointer
+                if (decl->array_expr[size])
+                {
+                    // allocate size for first array element
+                    values = (long int *) malloc(sizeof(long int) *(size+1));
+                }
+                
+                while (decl->array_expr[size]) {
+                    decl->array_expr[size]->accept(this);;
+                    values[size] = current_expression_value.i;
+                    // check if the next value occurs in the pointer
+                    if (decl->array_expr[size+1])
+                    {
+                        // allocate size for first array element
+                        temp_values = values;
+                        values = (long int *) malloc(sizeof(long int) *(size+1));
+                        ++size;
+                        // swap values
+                        int i =0;
+                        while (i < size) {
+                            values[i]  = temp_values[i];
+                            ++i;
+                        }
+                        // free temp_values
+                        free(temp_values);
+                    }
+                }
+                // change type to array type
+                decl -> type = parser::INT_ARR;
                 scopes.back()->declare(decl->identifier,
-                                       (long double)current_expression_value.i);
-            else
+                                    values);
+                if (values[0]) free(values);
+                break;
+            }
+            case parser::REAL:
+            {
+                long double *values = nullptr;
+                long double *temp_values = nullptr;
+                
+                int size = 0;
+                // check if the first value occurs in the pointer
+                if (decl->array_expr[size])
+                {
+                    // allocate size for first array element
+                    values = (long double *) malloc(sizeof(long double) *(size+1));
+                }
+                
+                while (decl->array_expr[size]) {
+                    decl->array_expr[size]->accept(this);;
+                    if(current_expression_type == parser::INT)
+                        values[size] = (long double)current_expression_value.i;
+                    else
+                        values[size] = current_expression_value.r;
+                    // check if the next value occurs in the pointer
+                    if (decl->array_expr[size+1])
+                    {
+                        // allocate size for first array element
+                        temp_values = values;
+                        values = (long double *) malloc(sizeof(long double) *(size+1));
+                        ++size;
+                        // swap values
+                        int i =0;
+                        while (i < size) {
+                            values[i]  = temp_values[i];
+                            ++i;
+                        }
+                        // free temp_values
+                        free(temp_values);
+                    }
+                }
+                // change type to array type
+                decl -> type = parser::REAL_ARR;
                 scopes.back()->declare(decl->identifier,
-                                        current_expression_value.r);
-            break;
-        case parser::BOOL:
-            scopes.back()->declare(decl->identifier,
-                                   current_expression_value.b);
-            break;
-        case parser::STRING:
-            scopes.back()->declare(decl->identifier,
-                                   current_expression_value.s);
-            break;
+                                        values);
+                if (values[0]) free(values);
+                break;
+            }
+            case parser::BOOL:
+               {
+                bool *values = nullptr;
+                bool *temp_values = nullptr;
+                
+                int size = 0;
+                // check if the first value occurs in the pointer
+                if (decl->array_expr[size])
+                {
+                    // allocate size for first array element
+                    values = (bool *) malloc(sizeof(bool) *(size+1));
+                }
+                
+                while (decl->array_expr[size]) {
+                    decl->array_expr[size]->accept(this);;
+                    values[size] = current_expression_value.b;
+                    // check if the next value occurs in the pointer
+                    if (decl->array_expr[size+1])
+                    {
+                        // allocate size for first array element
+                        temp_values = values;
+                        values = (bool *) malloc(sizeof(bool) *(size+1));
+                        ++size;
+                        // swap values
+                        int i =0;
+                        while (i < size) {
+                            values[i]  = temp_values[i];
+                            ++i;
+                        }
+                        // free temp_values
+                        free(temp_values);
+                    }
+                }
+                // change type to array type
+                decl -> type = parser::BOOL_ARR;
+                scopes.back()->declare(decl->identifier,
+                                    values);
+                if (values) free(values);
+                break;
+            }
+            case parser::STRING:
+                {
+                std::string *values = nullptr;
+                std::string *temp_values = nullptr;
+                
+                int size = 0;
+                // check if the first value occurs in the pointer
+                if (decl->array_expr[size])
+                {
+                    // allocate size for first array element
+                    values = (std::string *) malloc(sizeof(std::string) *(size+1));
+                }
+                
+                while (decl->array_expr[size]) {
+                    decl->array_expr[size]->accept(this);;
+                    values[size] = current_expression_value.s;
+                    // check if the next value occurs in the pointer
+                    if (decl->array_expr[size+1])
+                    {
+                        // allocate size for first array element
+                        temp_values = values;
+                        values = (std::string *) malloc(sizeof(std::string) *(size+1));
+                        ++size;
+                        // swap values
+                        int i =0;
+                        while (i < size) {
+                            values[i]  = temp_values[i];
+                            ++i;
+                        }
+                        // free temp_values
+                        free(temp_values);
+                    }
+                }
+                // change type to array type
+                decl -> type = parser::STRING_ARR;
+                scopes.back()->declare(decl->identifier,
+                                    values);
+                if (values) free(values);
+                break;
+            }
+        }
+    }
+    else
+        // IF NOT ARRAY
+        {
+        // Visit expression to update current value/type
+        decl -> expr -> accept(this);
+        switch(decl -> type){
+            case parser::INT:
+                scopes.back()->declare(decl->identifier,
+                                    current_expression_value.i);
+                break;
+            case parser::REAL:
+                if(current_expression_type == parser::INT)
+                    scopes.back()->declare(decl->identifier,
+                                        (long double)current_expression_value.i);
+                else
+                    scopes.back()->declare(decl->identifier,
+                                            current_expression_value.r);
+                break;
+            case parser::BOOL:
+                scopes.back()->declare(decl->identifier,
+                                    current_expression_value.b);
+                break;
+            case parser::STRING:
+                scopes.back()->declare(decl->identifier,
+                                    current_expression_value.s);
+                break;
+        }
     }
 }
 
@@ -205,32 +456,383 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
     // Determine innermost scope in which variable is declared
     unsigned long i;
     for (i = scopes.size() - 1; !scopes[i] -> already_declared(assign->identifier); i--);
+    
+    if (!assign->is_array)
+    {                                                       // Visit expression node to update current value/type
+        assign -> expr -> accept(this);
 
-    // Visit expression node to update current value/type
-    assign -> expr -> accept(this);
-
-    // Redeclare variable, depending on type
-    switch(scopes[i]->type_of(assign->identifier)){
-        case parser::INT:
-            scopes[i]->declare(assign->identifier,
-                               current_expression_value.i);
-            break;
-        case parser::REAL:
-            if(current_expression_type == parser::INT)
+        // Redeclare variable, depending on type
+        switch(scopes[i]->type_of(assign->identifier)){
+            case parser::INT:
                 scopes[i]->declare(assign->identifier,
-                                   (long double) current_expression_value.i);
-            else
+                                current_expression_value.i);
+                break;
+            case parser::REAL:
+                if(current_expression_type == parser::INT)
+                    scopes[i]->declare(assign->identifier,
+                                    (long double) current_expression_value.i);
+                else
+                    scopes[i]->declare(assign->identifier,
+                                    current_expression_value.r);
+                break;
+            case parser::BOOL:
                 scopes[i]->declare(assign->identifier,
-                                   current_expression_value.r);
-            break;
-        case parser::BOOL:
-            scopes[i]->declare(assign->identifier,
-                               current_expression_value.b);
-            break;
-        case parser::STRING:
-            scopes[i]->declare(assign->identifier,
-                               current_expression_value.s);
-            break;
+                                current_expression_value.b);
+                break;
+            case parser::STRING:
+                scopes[i]->declare(assign->identifier,
+                                current_expression_value.s);
+                break;
+            case parser::INT_ARR:
+                break;
+            case parser::REAL_ARR:
+                break;
+            case parser::BOOL_ARR:
+                break;
+            case parser::STRING_ARR:
+                break;
+        }
+    }
+    else{
+        
+        // Redeclare variable, depending on type
+        switch(scopes[i]->type_of(assign->identifier)){
+            case parser::INT:
+                break;
+            case parser::REAL:
+                break;
+            case parser::BOOL:
+                break;
+            case parser::STRING:
+                break;
+            case parser::INT_ARR:{
+                // Get array values
+                value_t value = scopes[i]->value_of(assign->identifier);
+                // Check if only one dimension is given
+                if (assign->last_position == 0) {
+                    // Check if we are changing a range or not
+                    if (!assign->change_range) {
+                        //  Check if expression exists
+                        if (assign->array_expr[0]) {
+                            //  Run the first expression only
+                            assign -> array_expr[0] -> accept(this);
+                            //  Check if the position exists then update
+                            if (value.i_[assign->first_position]) 
+                                value.i_[assign->first_position] = current_expression_value.i;
+                        }
+                    }
+                    else{
+                        long int *values = nullptr;
+                        long int *temp_values = nullptr;
+                        
+                        int size = 0;
+                        // check if the first value occurs in the pointer
+                        if (assign->array_expr[size])
+                        {
+                            // allocate size for first array element
+                            values = (long int *) malloc(sizeof(long int) *(size+1));
+                        }
+                        
+                        while (assign->array_expr[size]) {
+                            assign->array_expr[size]->accept(this);;
+                            values[size] = current_expression_value.i;
+                            // check if the next value occurs in the pointer
+                            if (assign->array_expr[size+1])
+                            {
+                                // allocate size for first array element
+                                temp_values = values;
+                                values = (long int *) malloc(sizeof(long int) *(size+1));
+                                ++size;
+                                // swap values
+                                int iter =0;
+                                while (iter < size) {
+                                    values[iter]  = temp_values[iter];
+                                    ++iter;
+                                }
+                                // free temp_values
+                                free(temp_values);
+                            }
+                        }
+                        value.i_ = values;
+                        if (values[0]) free(values);
+                    }
+                }
+                else{
+                    // If a range of values are given
+                    int first = assign->first_position;
+                    int last = assign->last_position;
+                    // Allocate memory for section values
+                    long int* section_values = (long int *) malloc(sizeof(long int) * ((last - first) + 1));
+                    int iter = 0;
+                    // Check next element existance while looping
+                    while (assign->array_expr[iter]) {
+                        //  Eat expression
+                        assign->array_expr[iter]->accept(this);
+                        section_values[iter] = current_expression_value.i;
+                        ++iter;
+                    }
+                    // Reinitialize iter to fit the next iteration of swapping
+                    iter = 0;
+                    while (first <= last) {
+                        value.i_[first] = section_values[iter];
+                        ++first;
+                        ++iter;
+                    }
+                    // Free held section values
+                    free(section_values);
+                }
+                    scopes[i]->declare(assign->identifier,
+                                value.i_);
+                break;
+            }
+            case parser::REAL_ARR:
+                {
+                // Get array values
+                value_t value = scopes[i]->value_of(assign->identifier);
+                // Check if only one dimension is given
+                if (assign->last_position == 0) {
+                    // Check if we are changing a range or not
+                    if (!assign->change_range) {
+                        //  Check if expression exists
+                        if (assign->array_expr[0]) {
+                            //  Run the first expression only
+                            assign -> array_expr[0] -> accept(this);
+                            //  Check if the position exists then update
+                            if (value.r_[assign->first_position]) 
+                                value.r_[assign->first_position] = current_expression_value.r;
+                        }
+                    }
+                    else{
+                        long double *values = nullptr;
+                        long double *temp_values = nullptr;
+                        
+                        int size = 0;
+                        // check if the first value occurs in the pointer
+                        if (assign->array_expr[size])
+                        {
+                            // allocate size for first array element
+                            values = (long double *) malloc(sizeof(long double) *(size+1));
+                        }
+                        
+                        while (assign->array_expr[size]) {
+                            assign->array_expr[size]->accept(this);;
+                            if(current_expression_type == parser::INT)
+                                values[size] = (long double)current_expression_value.i;
+                            else
+                                values[size] = current_expression_value.r;
+                            // check if the next value occurs in the pointer
+                            if (assign->array_expr[size+1])
+                            {
+                                // allocate size for first array element
+                                temp_values = values;
+                                values = (long double *) malloc(sizeof(long double) *(size+1));
+                                ++size;
+                                // swap values
+                                int iter =0;
+                                while (iter < size) {
+                                    values[iter]  = temp_values[iter];
+                                    ++iter;
+                                }
+                                // free temp_values
+                                free(temp_values);
+                            }
+                        }
+                        value.r_ = values;
+                        if (values[0]) free(values);
+                    }
+                }
+                else{
+                    // If a range of values are given
+                    int first = assign->first_position;
+                    int last = assign->last_position;
+                    // Allocate memory for section values
+                    long double* section_values = (long double *) malloc(sizeof(long double) * ((last - first) + 1));
+                    int iter = 0;
+                    // Check next element existance while looping
+                    while (assign->array_expr[iter]) {
+                        //  Eat expression
+                        assign->array_expr[iter]->accept(this);
+                        section_values[iter] = current_expression_value.r;
+                        ++iter;
+                    }
+                    // Reinitialize iter to fit the next iteration of swapping
+                    iter = 0;
+                    while (first <= last) {
+                        value.r_[first] = section_values[iter];
+                        ++first;
+                        ++iter;
+                    }
+                    // Free held section values
+                    free(section_values);
+                }
+                    scopes[i]->declare(assign->identifier,
+                                value.r_);
+                break;
+            }
+            case parser::BOOL_ARR:
+                {
+                // Get array values
+                value_t value = scopes[i]->value_of(assign->identifier);
+                // Check if only one dimension is given
+                if (assign->last_position == 0) {
+                    // Check if we are changing a range or not
+                    if (!assign->change_range) {
+                        //  Check if expression exists
+                        if (assign->array_expr[0]) {
+                            //  Run the first expression only
+                            assign -> array_expr[0] -> accept(this);
+                            //  Check if the position exists then update
+                            if (value.b_[assign->first_position]) 
+                                value.b_[assign->first_position] = current_expression_value.b;
+                        }
+                    }
+                    else{
+                        bool *values = nullptr;
+                        bool *temp_values = nullptr;
+                        
+                        int size = 0;
+                        // check if the first value occurs in the pointer
+                        if (assign->array_expr[size])
+                        {
+                            // allocate size for first array element
+                            values = (bool *) malloc(sizeof(bool) *(size+1));
+                        }
+                        
+                        while (assign->array_expr[size]) {
+                            assign->array_expr[size]->accept(this);;
+                            values[size] = current_expression_value.b;
+                            // check if the next value occurs in the pointer
+                            if (assign->array_expr[size+1])
+                            {
+                                // allocate size for first array element
+                                temp_values = values;
+                                values = (bool*) malloc(sizeof(bool) *(size+1));
+                                ++size;
+                                // swap values
+                                int iter =0;
+                                while (iter < size) {
+                                    values[iter]  = temp_values[iter];
+                                    ++iter;
+                                }
+                                // free temp_values
+                                free(temp_values);
+                            }
+                        }
+                        value.b_ = values;
+                        if (values[0]) free(values);
+                    }
+                }
+                else{
+                    // If a range of values are given
+                    int first = assign->first_position;
+                    int last = assign->last_position;
+                    // Allocate memory for section values
+                    bool* section_values = (bool *) malloc(sizeof(bool) * ((last - first) + 1));
+                    int iter = 0;
+                    // Check next element existance while looping
+                    while (assign->array_expr[iter]) {
+                        //  Eat expression
+                        assign->array_expr[iter]->accept(this);
+                        section_values[iter] = current_expression_value.b;
+                        ++iter;
+                    }
+                    // Reinitialize iter to fit the next iteration of swapping
+                    iter = 0;
+                    while (first <= last) {
+                        value.b_[first] = section_values[iter];
+                        ++first;
+                        ++iter;
+                    }
+                    // Free held section values
+                    free(section_values);
+                }
+                    scopes[i]->declare(assign->identifier,
+                                value.b_);
+                break;
+            }
+            case parser::STRING_ARR:
+                {
+                // Get array values
+                value_t value = scopes[i]->value_of(assign->identifier);
+                // Check if only one dimension is given
+                if (assign->last_position == 0) {
+                    // Check if we are changing a range or not
+                    if (!assign->change_range) {
+                        //  Check if expression exists
+                        if (assign->array_expr[0]) {
+                            //  Run the first expression only
+                            assign -> array_expr[0] -> accept(this);
+                            //  Check if the position exists then update
+                            // This position should be updated
+                            if (value.s_) 
+                                value.s_[assign->first_position] = current_expression_value.s;
+                        }
+                    }
+                    else{
+                        std::string *values = nullptr;
+                        std::string *temp_values = nullptr;
+                        
+                        int size = 0;
+                        // check if the first value occurs in the pointer
+                        if (assign->array_expr[size])
+                        {
+                            // allocate size for first array element
+                            values = (std::string *) malloc(sizeof(std::string) *(size+1));
+                        }
+                        
+                        while (assign->array_expr[size]) {
+                            assign->array_expr[size]->accept(this);;
+                            values[size] = current_expression_value.s;
+                            // check if the next value occurs in the pointer
+                            if (assign->array_expr[size+1])
+                            {
+                                // allocate size for first array element
+                                temp_values = values;
+                                values = (std::string*) malloc(sizeof(std::string) *(size+1));
+                                ++size;
+                                // swap values
+                                int iter =0;
+                                while (iter < size) {
+                                    values[iter]  = temp_values[iter];
+                                    ++iter;
+                                }
+                                // free temp_values
+                                free(temp_values);
+                            }
+                        }
+                        value.s_ = values;
+                        if (values) free(values);
+                    }
+                }
+                else{
+                    // If a range of values are given
+                    int first = assign->first_position;
+                    int last = assign->last_position;
+                    // Allocate memory for section values
+                    std::string* section_values = (std::string *) malloc(sizeof(std::string) * ((last - first) + 1));
+                    int iter = 0;
+                    // Check next element existance while looping
+                    while (assign->array_expr[iter]) {
+                        //  Eat expression
+                        assign->array_expr[iter]->accept(this);
+                        section_values[iter] = current_expression_value.s;
+                        ++iter;
+                    }
+                    // Reinitialize iter to fit the next iteration of swapping
+                    iter = 0;
+                    while (first <= last) {
+                        value.s_[first] = section_values[iter];
+                        ++first;
+                        ++iter;
+                    }
+                    // Free held section values
+                    free(section_values);
+                }
+                    scopes[i]->declare(assign->identifier,
+                                value.s_);
+                break;
+            }
+        }
     }
 }
 

@@ -114,7 +114,7 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
     std::string identifier;
     ASTExprNode* expr;
     unsigned int line_number;
-
+    bool is_array = false;
     // Eat type
     //consume_token();
 	identifier = current_token.value;
@@ -149,7 +149,7 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
                                  + std::to_string(current_token.line_number) + ".");
 
     // Create ASTExpressionNode to return
-    return new ASTDeclarationNode(type, identifier, expr, line_number);
+    return new ASTDeclarationNode(type, identifier, expr, line_number, is_array);
 }
 
 ASTAssignmentNode* Parser::parse_assignment_statement() {
@@ -181,7 +181,7 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
         throw std::runtime_error("Expected ';' after assignment of " + identifier + " on line "
                                  + std::to_string(current_token.line_number) + ".");
 
-    return new ASTAssignmentNode(identifier, expr, line_number);
+    return new ASTAssignmentNode(identifier, expr, line_number, false);
 }
 
 ASTPrintNode* Parser::parse_print_statement() {

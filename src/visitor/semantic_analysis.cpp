@@ -147,23 +147,48 @@ void SemanticAnalyser::visit(parser::ASTDeclarationNode *decl){
         throw std::runtime_error("Variable redeclaration on line " + std::to_string(decl->line_number) + ". '" +
                                   decl->identifier + "' was already declared in this scope on line " +
                                   std::to_string(current_scope->declaration_line(decl->identifier)) + ".");
+    // Check if array
+    if (decl->is_array) {
+        int array_size = 0;
+        while (decl->array_expr[array_size]) {
+            decl->array_expr[array_size]->accept(this);
+            ++array_size;
+        }
+        // allow mismatched type in the case of declaration of int to real
+        if(decl -> type == parser::REAL && current_expression_type == parser::INT)
+            current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number);
 
-    // Visit the expression to update current type
-    decl -> expr -> accept(this);
+        // types match
+        else if (decl -> type == current_expression_type)
+        {
+            if (decl -> type == parser::INT) current_scope->declare(decl->identifier, parser::INT_ARR, decl->line_number);
+            if (decl -> type == parser::REAL) current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number);
+            if (decl -> type == parser::BOOL) current_scope->declare(decl->identifier, parser::BOOL_ARR, decl->line_number);
+            if (decl -> type == parser::STRING) current_scope->declare(decl->identifier, parser::STRING_ARR, decl->line_number);
+        }
+        // types don't match
+        else
+            throw std::runtime_error("Found " + type_str(current_expression_type) + " on line " +
+                                    std::to_string(decl->line_number) + " in definition of '" +
+                                    decl -> identifier + "', expected " + type_str(decl->type) + ".");
+    }else{
+        // Visit the expression to update current type
+        decl -> expr -> accept(this);
 
-    // allow mismatched type in the case of declaration of int to real
-    if(decl -> type == parser::REAL && current_expression_type == parser::INT)
-        current_scope->declare(decl->identifier, parser::REAL, decl->line_number);
+        // allow mismatched type in the case of declaration of int to real
+        if(decl -> type == parser::REAL && current_expression_type == parser::INT)
+            current_scope->declare(decl->identifier, parser::REAL, decl->line_number);
 
-    // types match
-    else if (decl -> type == current_expression_type)
-        current_scope->declare(decl->identifier, decl->type, decl->line_number);
+        // types match
+        else if (decl -> type == current_expression_type)
+            current_scope->declare(decl->identifier, decl->type, decl->line_number);
 
-    // types don't match
-    else
-        throw std::runtime_error("Found " + type_str(current_expression_type) + " on line " +
-                                 std::to_string(decl->line_number) + " in definition of '" +
-                                 decl -> identifier + "', expected " + type_str(decl->type) + ".");
+        // types don't match
+        else
+            throw std::runtime_error("Found " + type_str(current_expression_type) + " on line " +
+                                    std::to_string(decl->line_number) + " in definition of '" +
+                                    decl -> identifier + "', expected " + type_str(decl->type) + ".");
+    }
 }
 
 void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {

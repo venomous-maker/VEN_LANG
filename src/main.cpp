@@ -376,7 +376,7 @@ void console_args(std::string fileargs){
     }
 }
 void help_menu(){
-std::cout << "\n" << "Welcome to \e[1;3;4mV3N0M "<<version<<"!\e[0m \n\n";
+            std::cout << "\n" << "Welcome to \e[1;3;4mV3N0M "<<version<<"!\e[0m \n\n";
             std::cout << "When using the console the interpreter will pick the following as arguments:\n\n";
             std::cout << std::setw(18);
             std::cout << "--h or -h or --help or -help       For help menu.\n\n";

@@ -17,17 +17,54 @@ ASTProgramNode::ASTProgramNode(std::vector<ASTNode*> statements) :
 
 // Statement Nodes
 ASTDeclarationNode::ASTDeclarationNode(TYPE type, std::string identifier, ASTExprNode *expr,
-                                       unsigned int line_number) :
+                                       unsigned int line_number,  bool is_array) :
     type(type),
     identifier(std::move(identifier)),
     expr(expr),
-    line_number(line_number)
+    array_expr(nullptr), 
+    line_number(line_number), 
+    is_array(is_array)
 {}
-
-ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode *expr, unsigned int line_number) :
+ASTDeclarationNode::ASTDeclarationNode(TYPE type, std::string identifier, ASTExprNode **expr,
+                                       unsigned int line_number,  bool is_array) :
+    type(type),
+    identifier(std::move(identifier)),
+    expr(nullptr),
+    array_expr(nullptr),
+    line_number(line_number),
+    is_array(is_array)
+{}
+ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode *expr, unsigned int line_number, bool is_array) :
         identifier(std::move(identifier)),
         expr(expr),
-        line_number(line_number)
+        array_expr(nullptr), 
+        line_number(line_number), 
+        is_array(is_array), 
+        first_position(0), 
+        last_position(0), 
+        change_range(false)
+{}
+
+ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode **array_expr, unsigned int line_number, bool is_array) :
+        identifier(std::move(identifier)),
+        expr(nullptr),
+        array_expr(array_expr), 
+        line_number(line_number), 
+        is_array(is_array), 
+        first_position(0), 
+        last_position(0),
+        change_range(false)
+{}
+
+ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode **array_expr, unsigned int line_number, bool is_array, unsigned int first_position,  unsigned int last_position, bool change_range) :
+        identifier(std::move(identifier)),
+        expr(nullptr),
+        array_expr(array_expr), 
+        line_number(line_number), 
+        is_array(is_array),
+        first_position(first_position), 
+        last_position(last_position), 
+        change_range(change_range)
 {}
 
 ASTIncludeNode::ASTIncludeNode(std::string file_name,unsigned int line_number) :

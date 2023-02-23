@@ -40,11 +40,15 @@ namespace parser {
 
     class ASTDeclarationNode : public ASTStatementNode {
     public:
-        ASTDeclarationNode(TYPE, std::string, ASTExprNode*, unsigned int);
+        ASTDeclarationNode(TYPE, std::string, ASTExprNode*, unsigned int,  bool);
+        ASTDeclarationNode(TYPE, std::string, ASTExprNode**, unsigned int, bool)
+;
         TYPE type;
         std::string identifier;
         ASTExprNode *expr;
+        ASTExprNode **array_expr;
         unsigned int line_number;
+        bool is_array;
         void accept(visitor::Visitor*) override;
     };
 	class ASTIncludeNode : public ASTStatementNode {
@@ -57,10 +61,17 @@ namespace parser {
 	};
     class ASTAssignmentNode : public ASTStatementNode {
     public:
-        ASTAssignmentNode(std::string, ASTExprNode*, unsigned int);
+        ASTAssignmentNode(std::string, ASTExprNode* , unsigned int , bool);
+        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool);
+        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, unsigned int, unsigned int, bool);
         std::string identifier;
         ASTExprNode *expr;
+        ASTExprNode **array_expr;
         unsigned int line_number;
+        bool is_array;
+        unsigned int first_position;
+        unsigned int last_position;
+        bool change_range;
         void accept(visitor::Visitor*) override;
     };
 
