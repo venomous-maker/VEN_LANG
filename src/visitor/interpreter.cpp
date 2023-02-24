@@ -57,28 +57,32 @@ void InterpreterScope::declare(std::string identifier, std::string string_value)
     variable_symbol_table[identifier] = std::make_pair(parser::STRING, value);
 }
 // Arrays
-void InterpreterScope::declare(std::string identifier, long int* int_value) {
+void InterpreterScope::declare(std::string identifier, long int* int_value, unsigned long int size) {
     value_t value;
     value.i_ = int_value;
     variable_symbol_table[identifier] = std::make_pair(parser::INT_ARR, value);
+    array_size_table[identifier] = std::make_pair(parser::INT_ARR, size);
 }
 
-void InterpreterScope::declare(std::string identifier, long double* real_value) {
+void InterpreterScope::declare(std::string identifier, long double* real_value,  unsigned long int size) {
     value_t value;
     value.r_ = real_value;
     variable_symbol_table[identifier] = std::make_pair(parser::REAL_ARR, value);
+    array_size_table[identifier] = std::make_pair(parser::REAL_ARR, size);
 }
 
-void InterpreterScope::declare(std::string identifier, bool* bool_value) {
+void InterpreterScope::declare(std::string identifier, bool* bool_value, unsigned long int size){
     value_t value;
     value.b_ = bool_value;
     variable_symbol_table[identifier] = std::make_pair(parser::BOOL_ARR, value);
+    array_size_table[identifier] = std::make_pair(parser::BOOL_ARR, size);
 }
 
-void InterpreterScope::declare(std::string identifier, std::string* string_value) {
+void InterpreterScope::declare(std::string identifier, std::string* string_value,  unsigned long int size) {
     value_t value;
     value.s_ = string_value;
     variable_symbol_table[identifier] = std::make_pair(parser::STRING_ARR, value);
+    array_size_table[identifier] = std::make_pair(parser::STRING_ARR, size);
 }
 void InterpreterScope::declare(std::string identifier, std::vector<parser::TYPE> signature,
                                std::vector<std::string> variable_names, parser::ASTBlockNode* block) {
@@ -288,11 +292,12 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                         // free temp_values
                         free(temp_values);
                     }
+                    else break;
                 }
                 // change type to array type
                 decl -> type = parser::INT_ARR;
                 scopes.back()->declare(decl->identifier,
-                                    values);
+                                    values, (values) ? size+1:size);
                 if (values[0]) free(values);
                 break;
             }
@@ -331,11 +336,12 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                         // free temp_values
                         free(temp_values);
                     }
+                    else break;
                 }
                 // change type to array type
                 decl -> type = parser::REAL_ARR;
                 scopes.back()->declare(decl->identifier,
-                                        values);
+                                        values, (values) ? size+1:size);
                 if (values[0]) free(values);
                 break;
             }
@@ -371,11 +377,12 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                         // free temp_values
                         free(temp_values);
                     }
+                    else break;
                 }
                 // change type to array type
                 decl -> type = parser::BOOL_ARR;
                 scopes.back()->declare(decl->identifier,
-                                    values);
+                                    values,  (values) ? size+1:size);
                 if (values) free(values);
                 break;
             }
@@ -411,11 +418,12 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                         // free temp_values
                         free(temp_values);
                     }
+                    else break;
                 }
                 // change type to array type
                 decl -> type = parser::STRING_ARR;
                 scopes.back()->declare(decl->identifier,
-                                    values);
+                                    values, (values) ? size+1:size);
                 if (values) free(values);
                 break;
             }
@@ -508,6 +516,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
             case parser::INT_ARR:{
                 // Get array values
                 value_t value = scopes[i]->value_of(assign->identifier);
+                // Deduct - from size to get the whole array size
+                unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : scopes[i]->array_size_table[assign->identifier].second - 1;
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -525,7 +535,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         long int *values = nullptr;
                         long int *temp_values = nullptr;
                         
-                        int size = 0;
+                        size = 0;
                         // check if the first value occurs in the pointer
                         if (assign->array_expr[size])
                         {
@@ -551,7 +561,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 }
                                 // free temp_values
                                 free(temp_values);
-                            }
+                            }else break;
                         }
                         value.i_ = values;
                         if (values[0]) free(values);
@@ -582,13 +592,16 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.i_);
+                                value.i_, (value.i_)  ? size + 1: 0);
                 break;
             }
             case parser::REAL_ARR:
                 {
                 // Get array values
                 value_t value = scopes[i]->value_of(assign->identifier);
+                // Deduct - from size to get the whole array size
+                unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
+                                                    scopes[i]->array_size_table[assign->identifier].second - 1;
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -606,7 +619,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         long double *values = nullptr;
                         long double *temp_values = nullptr;
                         
-                        int size = 0;
+                        size = 0;
                         // check if the first value occurs in the pointer
                         if (assign->array_expr[size])
                         {
@@ -635,7 +648,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 }
                                 // free temp_values
                                 free(temp_values);
-                            }
+                            }else break;
                         }
                         value.r_ = values;
                         if (values[0]) free(values);
@@ -666,7 +679,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.r_);
+                                value.r_, (value.r_)  ? size+1: 0);
                 break;
             }
             case parser::BOOL_ARR:
@@ -674,6 +687,9 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 // Get array values
                 value_t value = scopes[i]->value_of(assign->identifier);
                 // Check if only one dimension is given
+                // Deduct - from size to get the whole array size
+                unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
+                                                    scopes[i]->array_size_table[assign->identifier].second - 1;
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
                     if (!assign->change_range) {
@@ -690,7 +706,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         bool *values = nullptr;
                         bool *temp_values = nullptr;
                         
-                        int size = 0;
+                        size = 0;
                         // check if the first value occurs in the pointer
                         if (assign->array_expr[size])
                         {
@@ -717,6 +733,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 // free temp_values
                                 free(temp_values);
                             }
+                            else break;
                         }
                         value.b_ = values;
                         if (values[0]) free(values);
@@ -747,13 +764,16 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.b_);
+                                value.b_, (value.b_) ? size+1:0);
                 break;
             }
             case parser::STRING_ARR:
                 {
                 // Get array values
                 value_t value = scopes[i]->value_of(assign->identifier);
+                // Deduct - from size to get the whole array size
+                unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
+                                                    scopes[i]->array_size_table[assign->identifier].second - 1;
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -772,7 +792,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         std::string *values = nullptr;
                         std::string *temp_values = nullptr;
                         
-                        int size = 0;
+                        size = 0;
                         // check if the first value occurs in the pointer
                         if (assign->array_expr[size])
                         {
@@ -799,6 +819,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 // free temp_values
                                 free(temp_values);
                             }
+                            else break;
                         }
                         value.s_ = values;
                         if (values) free(values);
@@ -829,7 +850,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.s_);
+                                value.s_, (value.s_) ? size+1:0);
                 break;
             }
         }
@@ -855,10 +876,60 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
         case parser::STRING:
             std::cout << current_expression_value.s;
             break;
+        case parser::INT_ARR:{
+            int i = 0;
+            // Output array element
+            std::cout << "[";
+            while (current_expression_value.i_[i]) {
+                std::cout << current_expression_value.i_[i];
+                if (current_expression_value.i_[i+1]) std::cout << ",";
+                i++;
+            }
+            std::cout << "]";
+            break;
+        }
+        case parser::REAL_ARR:{
+            int i = 0;
+            // Output array element
+            std::cout << "[";
+            while (current_expression_value.r_[i]) {
+                std::cout << current_expression_value.r_[i];
+                if (current_expression_value.r_[i+1]) std::cout << ",";
+                i++;
+            }
+            std::cout << "]";
+            break;
+        }
+        case parser::BOOL_ARR:{
+            int i = 0;
+            // Output array element
+            std::cout << "[";
+            while (current_expression_value.b_[i]) {
+                std::cout << ((current_expression_value.b_[i]) ? "true" : "false");
+                if (current_expression_value.b_[i+1]) std::cout << ",";
+                i++;
+            }
+            std::cout << "]";
+            break;
+        }
+        case parser::STRING_ARR:{
+            int i = 0;
+            // Output array element
+            int * temp = (int*)current_expression_value.s_;
+            std::cout << "[";
+            while (temp[i]) {
+                std::cout << " "<< current_expression_value.s_[i];
+                if (temp[i+1]) std::cout << ",";
+                i++;
+            }
+            std::cout << "]";
+            break;
+        }
     }
     if(global::global_print_val != "printf")
     std:cout<<"\n";
 }
+
 void file_include(std::string fileargs);
 void visitor::Interpreter::visit(parser::ASTIncludeNode *includ){
 	//includ->file_path/*->accept(this)*/;

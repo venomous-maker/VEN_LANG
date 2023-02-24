@@ -34,10 +34,10 @@ namespace visitor {
         void declare(std::string, long double);
         void declare(std::string, bool);
         void declare(std::string, std::string);
-        void declare(std::string, long int*);
-        void declare(std::string, long double*);
-        void declare(std::string, bool*);
-        void declare(std::string, std::string*);
+        void declare(std::string, long int*, unsigned long int);
+        void declare(std::string, long double*, unsigned long int);
+        void declare(std::string, bool*, unsigned long int);
+        void declare(std::string, std::string*, unsigned long int);
         void declare(std::string, std::vector<parser::TYPE>, std::vector<std::string>,
                 parser::ASTBlockNode*);
 		void file_include(std::string fileargs);
@@ -47,12 +47,13 @@ namespace visitor {
         parser::ASTBlockNode* block_of(std::string, std::vector<parser::TYPE>);
 
         std::vector<std::tuple<std::string, std::string, std::string>>  variable_list();
+        std::map<std::string, 
+                 std::pair<parser::TYPE, unsigned long int>> array_size_table;
 
     private:
         std::map<std::string,
                  std::pair<parser::TYPE,
                            value_t>> variable_symbol_table;
-
         std::multimap<std::string,
                       std::tuple<std::vector<parser::TYPE>,
                                  std::vector<std::string>,

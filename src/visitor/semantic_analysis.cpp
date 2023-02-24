@@ -170,7 +170,7 @@ void SemanticAnalyser::visit(parser::ASTDeclarationNode *decl){
         else
             throw std::runtime_error("Found " + type_str(current_expression_type) + " on line " +
                                     std::to_string(decl->line_number) + " in definition of '" +
-                                    decl -> identifier + "', expected " + type_str(decl->type) + ".");
+                                    decl -> identifier + "', expected " + type_str(decl->type) + " in all elements.");
     }else{
         // Visit the expression to update current type
         decl -> expr -> accept(this);
@@ -194,28 +194,109 @@ void SemanticAnalyser::visit(parser::ASTDeclarationNode *decl){
 void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {
 
     // Determine the inner-most scope in which the value is declared
-    unsigned long i;
-    for (i = scopes.size() - 1; !scopes[i] -> already_declared(assign->identifier); i--)
-        if(i <= 0)
+    unsigned long j;
+    for (j = scopes.size() - 1; !scopes[j] -> already_declared(assign->identifier); j--)
+        if(j <= 0)
             throw std::runtime_error("Identifier '" + assign->identifier + "' being reassigned on line " +
                                      std::to_string(assign->line_number) + " was never declared " +
                                      ((scopes.size() == 1) ? "globally." : "in this scope."));
 
 
     // Get the type of the originally declared variable
-    parser::TYPE type = scopes[i]->type(assign->identifier);
+    parser::TYPE type = scopes[j]->type(assign->identifier);
+    if (assign->is_array) {
+        switch(type) {
+            case parser::INT_ARR:{
+                long int i = 0;
+                while (assign->array_expr[i]) {
+                    // Visit the expression to update current type
+                    assign->array_expr[i]->accept(this);
 
-    // Visit the expression to update current type
-    assign->expr->accept(this);
+                    // allow mismatched type in the case of declaration of int to real
+                    if (type == parser::REAL_ARR && current_expression_type == parser::INT) {}
 
-    // allow mismatched type in the case of declaration of int to real
-    if (type == parser::REAL && current_expression_type == parser::INT) {}
+                    // otherwise throw error
+                    else if (current_expression_type != parser::INT)
+                        throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
+                                                std::to_string(assign->line_number) + ". Expected " + type_str(parser::INT) +
+                                            ", found " + type_str(current_expression_type) + " in the elements.");
+                    i++;
+                }
+            }
+            case parser::REAL_ARR:{
+                long int i = 0;
+                while (assign->array_expr[i]) {
+                    // Visit the expression to update current type
+                    assign->array_expr[i]->accept(this);
 
-    // otherwise throw error
-    else if (current_expression_type != type)
-        throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
-                                 std::to_string(assign->line_number) + ". Expected " + type_str(type) +
-                                 ", found " + type_str(current_expression_type) + ".");
+                    // allow mismatched type in the case of declaration of int to real
+                    if (type == parser::REAL_ARR && current_expression_type == parser::INT) {}
+
+                    // otherwise throw error
+                    else if (current_expression_type != parser::REAL)
+                        throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
+                                                std::to_string(assign->line_number) + ". Expected " + type_str(parser::REAL) +
+                                            ", found " + type_str(current_expression_type) + " in the elements.");
+                    i++;
+                }
+            }
+            case parser::BOOL_ARR:{
+                long int i = 0;
+                while (assign->array_expr[i]) {
+                    // Visit the expression to update current type
+                    assign->array_expr[i]->accept(this);
+
+                    // allow mismatched type in the case of declaration of int to real
+                    if (type == parser::REAL_ARR && current_expression_type == parser::INT) {}
+
+                    // otherwise throw error
+                    else if (current_expression_type != parser::BOOL)
+                        throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
+                                                std::to_string(assign->line_number) + ". Expected " + type_str(parser::BOOL) +
+                                            ", found " + type_str(current_expression_type) + " in the elements.");
+                    i++;
+                }
+            }
+            case parser::STRING_ARR:{
+                long int i = 0;
+                while (assign->array_expr[i]) {
+                    // Visit the expression to update current type
+                    assign->array_expr[i]->accept(this);
+
+                    // allow mismatched type in the case of declaration of int to real
+                    if (type == parser::REAL_ARR && current_expression_type == parser::INT) {}
+
+                    // otherwise throw error
+                    else if (current_expression_type != parser::STRING)
+                        throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
+                                                std::to_string(assign->line_number) + ". Expected " + type_str(parser::STRING) +
+                                            ", found " + type_str(current_expression_type) + " in the elements.");
+                    i++;
+                }
+            }
+            case parser::INT:
+                break;
+            case parser::REAL:
+                break;
+            case parser::BOOL:
+                break;
+            case parser::STRING:
+                break;
+        }
+    }
+    else{
+        // Visit the expression to update current type
+        assign->expr->accept(this);
+
+        // allow mismatched type in the case of declaration of int to real
+        if (type == parser::REAL && current_expression_type == parser::INT) {}
+
+        // otherwise throw error
+        else if (current_expression_type != type)
+            throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
+                                    std::to_string(assign->line_number) + ". Expected " + type_str(type) +
+                                    ", found " + type_str(current_expression_type) + ".");
+    }
 }
 void SemanticAnalyser::visit(parser::ASTIncludeNode *includ){
 	// Update current expression
