@@ -1,2 +1,5 @@
 <program>
+    <print>
+        <id>n</id>
+    </print>
 </program>

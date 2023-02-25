@@ -18,7 +18,7 @@ namespace visitor {
     public:
         bool already_declared(std::string);
         bool already_declared(std::string, std::vector<parser::TYPE>);
-        void declare(std::string, parser::TYPE, unsigned int);
+        void declare(std::string, parser::TYPE, unsigned int,  unsigned long int);
         void declare(std::string, parser::TYPE, std::vector<parser::TYPE>, unsigned int);
         parser::TYPE type(std::string);
         parser::TYPE type(std::string, std::vector<parser::TYPE>);
@@ -26,6 +26,8 @@ namespace visitor {
         unsigned int declaration_line(std::string, std::vector<parser::TYPE>);
 
         std::vector<std::pair<std::string, std::string>> function_list();
+        std::map<std::string, 
+                 std::pair<parser::TYPE, unsigned long int>> array_size_table;
 
     private:
         std::map<std::string,
@@ -72,6 +74,7 @@ namespace visitor {
         std::vector<SemanticScope*> scopes;
         std::stack<parser::TYPE> functions;
         parser::TYPE current_expression_type;
+        unsigned long int current_array_size;
         std::vector<std::pair<std::string, parser::TYPE>> current_function_parameters;
         bool returns(parser::ASTStatementNode*);
     };

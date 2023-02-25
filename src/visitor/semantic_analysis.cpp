@@ -30,8 +30,22 @@ bool SemanticScope::already_declared(std::string identifier, std::vector<parser:
     return false;
 }
 
-void SemanticScope::declare(std::string identifier, parser::TYPE type, unsigned int line_number) {
-    variable_symbol_table[identifier] = std::make_pair(type, line_number);
+void SemanticScope::declare(std::string identifier, parser::TYPE type, unsigned int line_number, unsigned long int size) {
+    switch (type) {
+        case parser::INT:
+        case parser::REAL:
+        case parser::BOOL:
+        case parser::STRING:
+            variable_symbol_table[identifier] = std::make_pair(type, line_number);
+            break;
+        case parser::INT_ARR:
+        case parser::REAL_ARR:
+        case parser::BOOL_ARR:
+        case parser::STRING_ARR:
+            variable_symbol_table[identifier] = std::make_pair(type, line_number);
+            array_size_table[identifier] = std::make_pair(type, size);
+            break;
+    }
 }
 
 void SemanticScope::declare(std::string identifier, parser::TYPE type, std::vector<parser::TYPE> signature,
@@ -150,21 +164,37 @@ void SemanticAnalyser::visit(parser::ASTDeclarationNode *decl){
     // Check if array
     if (decl->is_array) {
         int array_size = 0;
-        while (decl->array_expr[array_size]) {
+        if (decl->array_expr == nullptr) throw std::runtime_error("Blah blah");
+        while (array_size < decl->array_size && decl->array_expr != nullptr) {
             decl->array_expr[array_size]->accept(this);
-            ++array_size;
+            switch (decl->type) {
+                case parser::REAL:
+                {
+                    if (decl -> type != parser::REAL && current_expression_type != parser::INT)
+                        throw std::runtime_error("Found " + type_str(current_expression_type) + " on line " +
+                                    std::to_string(decl->line_number) + " in definition of '" +
+                                    decl -> identifier + "', expected " + type_str(decl->type) + " in all elements.");
+                }
+                default:
+                    
+                    if (current_expression_type !=  decl->type && decl->type != parser::REAL)
+                        throw std::runtime_error("Found " + type_str(current_expression_type) + " on line " +
+                                    std::to_string(decl->line_number) + " in definition of '" +
+                                    decl -> identifier + "', expected " + type_str(decl->type) + " in all elements.");
+            }
+            array_size++;
         }
         // allow mismatched type in the case of declaration of int to real
         if(decl -> type == parser::REAL && current_expression_type == parser::INT)
-            current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number);
+            current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number,  decl->array_size);
 
         // types match
         else if (decl -> type == current_expression_type)
         {
-            if (decl -> type == parser::INT) current_scope->declare(decl->identifier, parser::INT_ARR, decl->line_number);
-            if (decl -> type == parser::REAL) current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number);
-            if (decl -> type == parser::BOOL) current_scope->declare(decl->identifier, parser::BOOL_ARR, decl->line_number);
-            if (decl -> type == parser::STRING) current_scope->declare(decl->identifier, parser::STRING_ARR, decl->line_number);
+            if (decl -> type == parser::INT) current_scope->declare(decl->identifier, parser::INT_ARR, decl->line_number, decl->array_size);
+            if (decl -> type == parser::REAL) current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number,  decl->array_size);
+            if (decl -> type == parser::BOOL) current_scope->declare(decl->identifier, parser::BOOL_ARR, decl->line_number,  decl->array_size);
+            if (decl -> type == parser::STRING) current_scope->declare(decl->identifier, parser::STRING_ARR, decl->line_number,  decl->array_size);
         }
         // types don't match
         else
@@ -177,11 +207,11 @@ void SemanticAnalyser::visit(parser::ASTDeclarationNode *decl){
 
         // allow mismatched type in the case of declaration of int to real
         if(decl -> type == parser::REAL && current_expression_type == parser::INT)
-            current_scope->declare(decl->identifier, parser::REAL, decl->line_number);
+            current_scope->declare(decl->identifier, parser::REAL, decl->line_number, 0);
 
         // types match
         else if (decl -> type == current_expression_type)
-            current_scope->declare(decl->identifier, decl->type, decl->line_number);
+            current_scope->declare(decl->identifier, decl->type, decl->line_number, 0);
 
         // types don't match
         else
@@ -205,6 +235,17 @@ void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {
     // Get the type of the originally declared variable
     parser::TYPE type = scopes[j]->type(assign->identifier);
     if (assign->is_array) {
+        
+        // Check if size is less than index
+        if (assign->last_position > 0 && assign->first_position > assign->last_position)
+            throw std::runtime_error("Invalid array range of "+ std::to_string(assign->first_position) + " : "+
+             std::to_string(assign->last_position)+ " in identifier "+ assign->identifier + " on line "+
+              std::to_string(assign->line_number)+"."); 
+        
+        if (assign->first_position > scopes[j]->array_size_table[assign->identifier].second
+            || assign->last_position > scopes[j]->array_size_table[assign->identifier].second)
+            throw std::runtime_error("Trying to access "+((assign->first_position> scopes[j]->array_size_table[assign->identifier].second) ? std::to_string(assign->first_position):"") +" "+ ((assign->last_position > scopes[j]->array_size_table[assign->identifier].second)  ? std::to_string(assign->last_position):"")+
+                " in "+assign->identifier+" with size 0 : "+std::to_string(scopes[j]->array_size_table[assign->identifier].second)+" on line "+std::to_string(assign->line_number)+".");
         switch(type) {
             case parser::INT_ARR:{
                 long int i = 0;
@@ -328,7 +369,7 @@ void SemanticAnalyser::visit(parser::ASTBlockNode *block) {
     // Check whether this is a function block by seeing if we have any current function
     // parameters. If we do, then add them to the current scope.
     for(auto param : current_function_parameters)
-        scopes.back() -> declare(param.first, param.second, block->line_number);
+        scopes.back() -> declare(param.first, param.second, block->line_number, 0);
 
     // Clear the global function parameters vector
     current_function_parameters.clear();
@@ -658,6 +699,14 @@ std::string type_str(parser::TYPE t) {
             return "bool";
         case parser::STRING:
             return "string";
+            case parser::INT_ARR:
+            return "int_array";
+        case parser::REAL_ARR:
+            return "float_array";
+        case parser::BOOL_ARR:
+            return "bool_array";
+        case parser::STRING_ARR:
+            return "string_array";
         default:
             throw std::runtime_error("Invalid type encountered.");
     }

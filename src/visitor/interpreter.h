@@ -47,6 +47,7 @@ namespace visitor {
         parser::ASTBlockNode* block_of(std::string, std::vector<parser::TYPE>);
 
         std::vector<std::tuple<std::string, std::string, std::string>>  variable_list();
+        std::vector<std::tuple<std::string, std::string, std::string*>> array_variable_list(); 
         std::map<std::string, 
                  std::pair<parser::TYPE, unsigned long int>> array_size_table;
 
@@ -96,6 +97,7 @@ namespace visitor {
         std::vector<InterpreterScope*> scopes;
         parser::TYPE current_expression_type;
         value_t current_expression_value;
+        unsigned long int current_array_size;
         std::vector<std::string> current_function_parameters;
         std::vector<std::pair<parser::TYPE, value_t>> current_function_arguments;
     };

@@ -54,6 +54,7 @@ void XMLVisitor::visit(parser::ASTDeclarationNode *decl) {
                              << decl -> identifier << "</id>" << std::endl;
 
     // Expression tags
+    if (!decl->is_array)
     decl -> expr -> accept(this);
 
     // Unindent
@@ -75,6 +76,7 @@ void XMLVisitor::visit(parser::ASTAssignmentNode *assign) {
     xmlfile << indentation() << "<id>" << assign -> identifier << "</id>" << std::endl;
 
     // Expression tags
+    if (!assign->is_array)
     assign -> expr -> accept(this);
 
     // Unindent

@@ -168,6 +168,7 @@ std::vector<std::tuple<std::string, std::string, std::string>> InterpreterScope:
                         }
                         free(result_temp);
                     }
+                    else break;
                 }
                 
                 list_array.emplace_back(std::make_tuple(
@@ -234,6 +235,113 @@ std::vector<std::tuple<std::string, std::string, std::string>> InterpreterScope:
     return std::move(list);
 }
 
+std::vector<std::tuple<std::string, std::string, std::string*>> InterpreterScope::array_variable_list() {
+    std::vector<std::tuple<std::string, std::string, std::string*>> list_array;
+
+    for(auto const &var : variable_symbol_table)
+        switch(var.second.first){
+            case parser::INT:
+                break;
+            case parser::REAL:
+                break;
+            case parser::BOOL:
+                break;
+            case parser::STRING:
+                break;
+            case parser::INT_ARR:
+            {
+                long unsigned int arr_size = array_size_table[var.first].second;
+                long unsigned int size = 0;
+                std::string* result = nullptr;
+                std::string* result_temp = nullptr;
+                if (arr_size > 0) result = (std::string*)malloc(sizeof(std::string) * (arr_size));
+                while (size < arr_size) {
+                    result[size] = std::to_string(var.second.second.i_[size]);
+                    /*if (var.second.second.i_[size+1]) {
+                        result_temp = result;
+                        ++size;
+                        result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                        int i = 0;
+                        while (i < size) {
+                            result[i] = result_temp[i];
+                            ++i;
+                        }
+                        free(result_temp);
+                    }
+                    else break;*/
+                    size++;
+                }
+                
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "int_array", result));
+                //free(result);
+                break;
+            }
+            case parser::REAL_ARR:
+            {
+               long unsigned int arr_size = array_size_table[var.first].second;
+                long unsigned int size = 0;
+                std::string* result = nullptr;
+                std::string* result_temp = nullptr;
+                if (arr_size > 0) result = (std::string*)malloc(sizeof(std::string) * (arr_size));
+                while (size < arr_size) {
+                    result[size] = std::to_string(var.second.second.r_[size]);
+                    /*if (var.second.second.i_[size+1]) {
+                        result_temp = result;
+                        ++size;
+                        result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                        int i = 0;
+                        while (i < size) {
+                            result[i] = result_temp[i];
+                            ++i;
+                        }
+                        free(result_temp);
+                    }
+                    else break;*/
+                    size++;
+                }
+                
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "float_array", result));
+               // free(result);
+                break;
+            }
+            case parser::BOOL_ARR:
+            {
+                long unsigned int arr_size = array_size_table[var.first].second;
+                long unsigned int size = 0;
+                std::string* result = nullptr;
+                std::string* result_temp = nullptr;
+                if (arr_size > 0) result = (std::string*)malloc(sizeof(std::string) * (arr_size));
+                while (size < arr_size) {
+                    result[size] = var.second.second.b_[size]  ? "true": "false";
+                    /*if (var.second.second.i_[size+1]) {
+                        result_temp = result;
+                        ++size;
+                        result = (std::string*)malloc(sizeof(std::string) * (size+1));
+                        int i = 0;
+                        while (i < size) {
+                            result[i] = result_temp[i];
+                            ++i;
+                        }
+                        free(result_temp);
+                    }
+                    else break;*/
+                    size++;
+                }
+                
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "bool_array", result));
+                //free(result);
+                break;
+            }
+            case parser::STRING_ARR:
+                list_array.emplace_back(std::make_tuple(
+                        var.first, "string_array",  var.second.second.s_));
+                break;
+        }
+    return std::move(list_array);
+}
 
 Interpreter::Interpreter(){
     // Add global scope
@@ -267,22 +375,21 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                 
                 int size = 0;
                 // check if the first value occurs in the pointer
-                if (decl->array_expr[size])
+                if (decl->array_size > 0)
                 {
                     // allocate size for first array element
-                    values = (long int *) malloc(sizeof(long int) *(size+1));
+                    values = (long int *) calloc((decl->array_size), sizeof(long int));
                 }
-                
-                while (decl->array_expr[size]) {
+                while (size < decl->array_size) {
                     decl->array_expr[size]->accept(this);;
                     values[size] = current_expression_value.i;
                     // check if the next value occurs in the pointer
-                    if (decl->array_expr[size+1])
+                    /*if (size+1 < decl->array_size)
                     {
                         // allocate size for first array element
                         temp_values = values;
-                        values = (long int *) malloc(sizeof(long int) *(size+1));
                         ++size;
+                        values = (long int *) malloc(sizeof(long int) *(size+1));
                         // swap values
                         int i =0;
                         while (i < size) {
@@ -290,15 +397,16 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                             ++i;
                         }
                         // free temp_values
-                        free(temp_values);
-                    }
-                    else break;
+                        //free(temp_values);
+                    } */
+                    
+                    ++ size;
                 }
                 // change type to array type
                 decl -> type = parser::INT_ARR;
                 scopes.back()->declare(decl->identifier,
-                                    values, (values) ? size+1:size);
-                if (values[0]) free(values);
+                                    values, (decl->array_size > 0) ? decl->array_size:0);
+                //if (values[0]) free(values);
                 break;
             }
             case parser::REAL:
@@ -306,43 +414,44 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                 long double *values = nullptr;
                 long double *temp_values = nullptr;
                 
-                int size = 0;
+                unsigned long int size = 0;
                 // check if the first value occurs in the pointer
-                if (decl->array_expr[size])
+                if (decl->array_size > 0)
                 {
                     // allocate size for first array element
-                    values = (long double *) malloc(sizeof(long double) *(size+1));
+                    values = (long double *) calloc((decl->array_size), sizeof(long double));
                 }
                 
-                while (decl->array_expr[size]) {
+                while (size < decl->array_size) {
                     decl->array_expr[size]->accept(this);;
                     if(current_expression_type == parser::INT)
                         values[size] = (long double)current_expression_value.i;
                     else
                         values[size] = current_expression_value.r;
                     // check if the next value occurs in the pointer
-                    if (decl->array_expr[size+1])
-                    {
+                    //if (size+1 < decl->array_size)
+                    //{
                         // allocate size for first array element
-                        temp_values = values;
-                        values = (long double *) malloc(sizeof(long double) *(size+1));
-                        ++size;
+                        //temp_values = values;
+                    ++size;
+                        //values = (long double *) malloc(sizeof(long double) *(size+1));
+                        //++size;
                         // swap values
-                        int i =0;
-                        while (i < size) {
-                            values[i]  = temp_values[i];
-                            ++i;
-                        }
+                        //int i =0;
+                        //while (i < size) {
+                        //    values[i]  = temp_values[i];
+                        //    ++i;
+                        //}
                         // free temp_values
-                        free(temp_values);
-                    }
-                    else break;
+                        //free(temp_values);
+                    //}
+                    //else break;
                 }
                 // change type to array type
                 decl -> type = parser::REAL_ARR;
                 scopes.back()->declare(decl->identifier,
-                                        values, (values) ? size+1:size);
-                if (values[0]) free(values);
+                                        values, (decl->array_size > 0) ? decl->array_size:0);
+                //if (values[0]) free(values);
                 break;
             }
             case parser::BOOL:
@@ -352,37 +461,38 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                 
                 int size = 0;
                 // check if the first value occurs in the pointer
-                if (decl->array_expr[size])
+                if (decl->array_size > 0)
                 {
                     // allocate size for first array element
-                    values = (bool *) malloc(sizeof(bool) *(size+1));
+                    values = (bool *) calloc((decl->array_size), sizeof(bool));
                 }
                 
-                while (decl->array_expr[size]) {
+                while (size < decl->array_size) {
                     decl->array_expr[size]->accept(this);;
                     values[size] = current_expression_value.b;
                     // check if the next value occurs in the pointer
-                    if (decl->array_expr[size+1])
+                    /*if (size+1 < decl->array_size)
                     {
                         // allocate size for first array element
-                        temp_values = values;
-                        values = (bool *) malloc(sizeof(bool) *(size+1));
-                        ++size;
+                        temp_values = values;*/
+                    ++size;
+                        /*values = (bool *) malloc(sizeof(bool) *(size+1));
+                        //++size;
                         // swap values
                         int i =0;
                         while (i < size) {
                             values[i]  = temp_values[i];
                             ++i;
-                        }
+                        } */
                         // free temp_values
-                        free(temp_values);
-                    }
-                    else break;
+                        //free(temp_values);
+                    //}
+                   // else break;
                 }
                 // change type to array type
                 decl -> type = parser::BOOL_ARR;
                 scopes.back()->declare(decl->identifier,
-                                    values,  (values) ? size+1:size);
+                                    values,  (decl->array_size > 0) ? decl->array_size:0);
                 if (values) free(values);
                 break;
             }
@@ -393,22 +503,22 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                 
                 int size = 0;
                 // check if the first value occurs in the pointer
-                if (decl->array_expr[size])
+                if (decl->array_size > 0)
                 {
                     // allocate size for first array element
-                    values = (std::string *) malloc(sizeof(std::string) *(size+1));
+                    values = (std::string *) calloc((decl->array_size), sizeof(std::string));
                 }
-                
-                while (decl->array_expr[size]) {
+                //std::cout << decl->array_size;
+                while (size < decl->array_size) {
                     decl->array_expr[size]->accept(this);;
                     values[size] = current_expression_value.s;
                     // check if the next value occurs in the pointer
-                    if (decl->array_expr[size+1])
+                    /*if (size+1<decl->array_size)
                     {
                         // allocate size for first array element
-                        temp_values = values;
-                        values = (std::string *) malloc(sizeof(std::string) *(size+1));
-                        ++size;
+                        temp_values = values;*/
+                    ++size;
+                        /*values = (std::string *) malloc(sizeof(std::string) *(size+1));
                         // swap values
                         int i =0;
                         while (i < size) {
@@ -416,15 +526,15 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                             ++i;
                         }
                         // free temp_values
-                        free(temp_values);
+                        //free(temp_values);
                     }
-                    else break;
+                    else break;*/
                 }
                 // change type to array type
                 decl -> type = parser::STRING_ARR;
                 scopes.back()->declare(decl->identifier,
-                                    values, (values) ? size+1:size);
-                if (values) free(values);
+                                    values, (decl->array_size>0) ? decl->array_size:0);
+               // if (values) free(values);
                 break;
             }
         }
@@ -517,7 +627,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 // Get array values
                 value_t value = scopes[i]->value_of(assign->identifier);
                 // Deduct - from size to get the whole array size
-                unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : scopes[i]->array_size_table[assign->identifier].second - 1;
+                unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : scopes[i]->array_size_table[assign->identifier].second;
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -534,25 +644,26 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     else{
                         long int *values = nullptr;
                         long int *temp_values = nullptr;
-                        
+                        // Destroy size
                         size = 0;
                         // check if the first value occurs in the pointer
-                        if (assign->array_expr[size])
+                        if (assign->array_size > 0)
                         {
                             // allocate size for first array element
-                            values = (long int *) malloc(sizeof(long int) *(size+1));
+                            values = (long int *) calloc(assign->array_size, sizeof(long int));
                         }
                         
-                        while (assign->array_expr[size]) {
+                        while (size < assign->array_size) {
                             assign->array_expr[size]->accept(this);;
                             values[size] = current_expression_value.i;
                             // check if the next value occurs in the pointer
-                            if (assign->array_expr[size+1])
+                            /*if (assign->array_size > size+1)
                             {
                                 // allocate size for first array element
                                 temp_values = values;
-                                values = (long int *) malloc(sizeof(long int) *(size+1));
                                 ++size;
+                                values = (long int *) malloc(sizeof(long int) *(size+1));
+                                //++size;
                                 // swap values
                                 int iter =0;
                                 while (iter < size) {
@@ -561,10 +672,11 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 }
                                 // free temp_values
                                 free(temp_values);
-                            }else break;
+                            }else break;*/
+                            size++;
                         }
                         value.i_ = values;
-                        if (values[0]) free(values);
+                        //if (values[0]) free(values);
                     }
                 }
                 else{
@@ -572,10 +684,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = assign->first_position;
                     int last = assign->last_position;
                     // Allocate memory for section values
-                    long int* section_values = (long int *) malloc(sizeof(long int) * ((last - first) + 1));
+                    long int* section_values = (long int *) calloc((assign->array_size),  sizeof(long int));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (assign->array_expr[iter]) {
+                    while (iter < assign->array_size) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.i;
@@ -589,10 +701,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         ++iter;
                     }
                     // Free held section values
-                    free(section_values);
+                    //free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.i_, (value.i_)  ? size + 1: 0);
+                                value.i_, (value.i_)  ? size: 0);
                 break;
             }
             case parser::REAL_ARR:
@@ -601,7 +713,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 value_t value = scopes[i]->value_of(assign->identifier);
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
-                                                    scopes[i]->array_size_table[assign->identifier].second - 1;
+                                                    scopes[i]->array_size_table[assign->identifier].second;
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -621,25 +733,27 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         
                         size = 0;
                         // check if the first value occurs in the pointer
-                        if (assign->array_expr[size])
+                        if (assign->array_size > size)
                         {
                             // allocate size for first array element
-                            values = (long double *) malloc(sizeof(long double) *(size+1));
+                            values = (long double *) calloc(assign->array_size, sizeof(long double));
                         }
                         
-                        while (assign->array_expr[size]) {
+                        while (assign->array_size > size) {
                             assign->array_expr[size]->accept(this);;
                             if(current_expression_type == parser::INT)
                                 values[size] = (long double)current_expression_value.i;
                             else
                                 values[size] = current_expression_value.r;
                             // check if the next value occurs in the pointer
-                            if (assign->array_expr[size+1])
+                            size++;
+                           /* if (assign->array_size > size+1)
                             {
                                 // allocate size for first array element
                                 temp_values = values;
-                                values = (long double *) malloc(sizeof(long double) *(size+1));
                                 ++size;
+                                values = (long double *) malloc(sizeof(long double) *(size+1));
+                                //++size;
                                 // swap values
                                 int iter =0;
                                 while (iter < size) {
@@ -648,10 +762,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 }
                                 // free temp_values
                                 free(temp_values);
-                            }else break;
+                            }else break;*/
                         }
                         value.r_ = values;
-                        if (values[0]) free(values);
+                        //if (values[0]) free(values);
                     }
                 }
                 else{
@@ -659,10 +773,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = assign->first_position;
                     int last = assign->last_position;
                     // Allocate memory for section values
-                    long double* section_values = (long double *) malloc(sizeof(long double) * ((last - first) + 1));
+                    long double* section_values = (long double *) calloc((last - first) + 1, sizeof(long double));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (assign->array_expr[iter]) {
+                    while (iter < (last - first) + 1) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.r;
@@ -676,10 +790,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         ++iter;
                     }
                     // Free held section values
-                    free(section_values);
+                    //free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.r_, (value.r_)  ? size+1: 0);
+                                value.r_, (value.r_)  ? size: 0);
                 break;
             }
             case parser::BOOL_ARR:
@@ -689,7 +803,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 // Check if only one dimension is given
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
-                                                    scopes[i]->array_size_table[assign->identifier].second - 1;
+                                                    scopes[i]->array_size_table[assign->identifier].second;
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
                     if (!assign->change_range) {
@@ -708,22 +822,24 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         
                         size = 0;
                         // check if the first value occurs in the pointer
-                        if (assign->array_expr[size])
+                        if (assign->array_size > size)
                         {
                             // allocate size for first array element
-                            values = (bool *) malloc(sizeof(bool) *(size+1));
+                            values = (bool *) calloc(assign->array_size,  sizeof(bool));
                         }
                         
-                        while (assign->array_expr[size]) {
+                        while (assign->array_size > size) {
                             assign->array_expr[size]->accept(this);;
                             values[size] = current_expression_value.b;
                             // check if the next value occurs in the pointer
-                            if (assign->array_expr[size+1])
+                            ++size;
+                            /*if (assign->array_expr[size+1])
                             {
                                 // allocate size for first array element
                                 temp_values = values;
-                                values = (bool*) malloc(sizeof(bool) *(size+1));
                                 ++size;
+                                values = (bool*) malloc(sizeof(bool) *(size+1));
+                                //++size;
                                 // swap values
                                 int iter =0;
                                 while (iter < size) {
@@ -733,10 +849,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 // free temp_values
                                 free(temp_values);
                             }
-                            else break;
+                            else break;*/
                         }
                         value.b_ = values;
-                        if (values[0]) free(values);
+                        //if (values[0]) free(values);
                     }
                 }
                 else{
@@ -744,10 +860,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = assign->first_position;
                     int last = assign->last_position;
                     // Allocate memory for section values
-                    bool* section_values = (bool *) malloc(sizeof(bool) * ((last - first) + 1));
+                    bool* section_values = (bool *) calloc((last - first) + 1, sizeof(bool));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (assign->array_expr[iter]) {
+                    while (iter < ((last - first) + 1)) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.b;
@@ -764,7 +880,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.b_, (value.b_) ? size+1:0);
+                                value.b_, (value.b_) ? size:0);
                 break;
             }
             case parser::STRING_ARR:
@@ -773,7 +889,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 value_t value = scopes[i]->value_of(assign->identifier);
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
-                                                    scopes[i]->array_size_table[assign->identifier].second - 1;
+                                                    scopes[i]->array_size_table[assign->identifier].second;
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -794,22 +910,22 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         
                         size = 0;
                         // check if the first value occurs in the pointer
-                        if (assign->array_expr[size])
+                        if (assign->array_size > size)
                         {
                             // allocate size for first array element
-                            values = (std::string *) malloc(sizeof(std::string) *(size+1));
+                            values = (std::string *) calloc(assign->array_size, sizeof(std::string));
                         }
                         
-                        while (assign->array_expr[size]) {
+                        while (assign->array_size > size) {
                             assign->array_expr[size]->accept(this);;
                             values[size] = current_expression_value.s;
                             // check if the next value occurs in the pointer
-                            if (assign->array_expr[size+1])
+                            /*if (assign->array_expr[size+1])
                             {
                                 // allocate size for first array element
                                 temp_values = values;
-                                values = (std::string*) malloc(sizeof(std::string) *(size+1));
                                 ++size;
+                                values = (std::string*) malloc(sizeof(std::string) *(size+1));
                                 // swap values
                                 int iter =0;
                                 while (iter < size) {
@@ -819,10 +935,11 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 // free temp_values
                                 free(temp_values);
                             }
-                            else break;
+                            else break;*/
+                            ++size;
                         }
                         value.s_ = values;
-                        if (values) free(values);
+                        //if (values) free(values);
                     }
                 }
                 else{
@@ -830,10 +947,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = assign->first_position;
                     int last = assign->last_position;
                     // Allocate memory for section values
-                    std::string* section_values = (std::string *) malloc(sizeof(std::string) * ((last - first) + 1));
+                    std::string* section_values = (std::string *) calloc( ((last - first) + 1), sizeof(std::string));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (assign->array_expr[iter]) {
+                    while ( ((last - first) + 1) > iter) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.s;
@@ -847,10 +964,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                         ++iter;
                     }
                     // Free held section values
-                    free(section_values);
+                    // free(section_values);
                 }
                     scopes[i]->declare(assign->identifier,
-                                value.s_, (value.s_) ? size+1:0);
+                                value.s_, (value.s_) ? size:0);
                 break;
             }
         }
@@ -879,11 +996,13 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
         case parser::INT_ARR:{
             int i = 0;
             // Output array element
+           // long int * l = current_expression_value.i_;
             std::cout << "[";
-            while (current_expression_value.i_[i]) {
+            while (i < current_array_size) {
                 std::cout << current_expression_value.i_[i];
-                if (current_expression_value.i_[i+1]) std::cout << ",";
-                i++;
+                if (current_array_size > i+1) std::cout << ",";
+                else break;
+                ++i;
             }
             std::cout << "]";
             break;
@@ -892,9 +1011,9 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
             int i = 0;
             // Output array element
             std::cout << "[";
-            while (current_expression_value.r_[i]) {
+            while (i < current_array_size) {
                 std::cout << current_expression_value.r_[i];
-                if (current_expression_value.r_[i+1]) std::cout << ",";
+                if (current_array_size > i+1) std::cout << ","; else break;
                 i++;
             }
             std::cout << "]";
@@ -904,9 +1023,9 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
             int i = 0;
             // Output array element
             std::cout << "[";
-            while (current_expression_value.b_[i]) {
+            while (current_array_size > i) {
                 std::cout << ((current_expression_value.b_[i]) ? "true" : "false");
-                if (current_expression_value.b_[i+1]) std::cout << ",";
+                if (current_array_size > i+1) std::cout << ","; else break;
                 i++;
             }
             std::cout << "]";
@@ -915,11 +1034,12 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
         case parser::STRING_ARR:{
             int i = 0;
             // Output array element
-            int * temp = (int*)current_expression_value.s_;
+            //int * temp = (int*)current_expression_value.s_;
             std::cout << "[";
-            while (temp[i]) {
+            while (current_array_size > i) {
                 std::cout << " "<< current_expression_value.s_[i];
-                if (temp[i+1]) std::cout << ",";
+                if (current_array_size > i+1) std::cout << ",";
+                else break;
                 i++;
             }
             std::cout << "]";
@@ -966,6 +1086,22 @@ void visitor::Interpreter::visit(parser::ASTBlockNode *block) {
                 scopes.back() -> declare(current_function_parameters[i],
                                          current_function_arguments[i].second.s);
                 break;
+            case parser::INT_ARR:
+                scopes.back() -> declare(current_function_parameters[i],
+                                         current_function_arguments[i].second.i_);
+                break;
+            case parser::REAL_ARR:
+                scopes.back() -> declare(current_function_parameters[i],
+                                         current_function_arguments[i].second.r_);
+                break;
+            case parser::BOOL_ARR:
+                scopes.back() -> declare(current_function_parameters[i],
+                                         current_function_arguments[i].second.b_);
+                break;
+            case parser::STRING_ARR:
+                scopes.back() -> declare(current_function_parameters[i],
+                                         current_function_arguments[i].second.s_);
+                break;
         }
     }
 
@@ -987,10 +1123,14 @@ void visitor::Interpreter::visit(parser::ASTIfNode *ifNode) {
     ifNode -> condition -> accept(this);
     // Captures execution in else if to make else statement reachable
     bool in_else_if = false;
+    bool if_ = false;
     // Execute appropriate blocks
-    if(current_expression_value.b)
+    if(current_expression_value.b) {
+        if_ = true;
         ifNode -> if_block -> accept(this);
-    if(ifNode -> else_if_block){
+    }
+    // if if not executed
+    if(ifNode -> else_if_block && !if_){
         // else if statements
         int i = 0;
         while(ifNode->else_if_block[i]){
@@ -1005,8 +1145,8 @@ void visitor::Interpreter::visit(parser::ASTIfNode *ifNode) {
             ++i;
         }
     }
-    // If else-if is not executed proceed to else
-    if(!in_else_if){
+    // If else-if and if not executed proceed to else
+    if(!in_else_if && !if_){
         if(ifNode -> else_block)
             ifNode -> else_block -> accept(this);
     }
@@ -1041,6 +1181,7 @@ void visitor::Interpreter::visit(parser::ASTLiteralNode<long int> *lit) {
     v.i = lit->val;
     current_expression_type = parser::INT;
     current_expression_value = std::move(v);
+    current_array_size = 0;
 }
 
 void visitor::Interpreter::visit(parser::ASTLiteralNode<long double> *lit) {
@@ -1048,6 +1189,7 @@ void visitor::Interpreter::visit(parser::ASTLiteralNode<long double> *lit) {
     v.r = lit->val;
     current_expression_type = parser::REAL;
     current_expression_value = std::move(v);
+    current_array_size = 0;
 }
 
 void visitor::Interpreter::visit(parser::ASTLiteralNode<bool> *lit) {
@@ -1055,6 +1197,7 @@ void visitor::Interpreter::visit(parser::ASTLiteralNode<bool> *lit) {
     v.b = lit->val;
     current_expression_type = parser::BOOL;
     current_expression_value = std::move(v);
+    current_array_size = 0;
 }
 
 void visitor::Interpreter::visit(parser::ASTLiteralNode<std::string> *lit) {
@@ -1062,6 +1205,7 @@ void visitor::Interpreter::visit(parser::ASTLiteralNode<std::string> *lit) {
     v.s = lit->val;
     current_expression_type = parser::STRING;
     current_expression_value = std::move(v);
+    current_array_size = 0;
 }
 
 void visitor::Interpreter::visit(parser::ASTLiteralNode<long int*> *lit) {
@@ -1259,10 +1403,14 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
     // Determine innermost scope in which variable is declared
     unsigned long i;
     for (i = scopes.size() - 1; !scopes[i] -> already_declared(id->identifier); i--);
-
+    
     // Update current expression
     current_expression_type = scopes[i] -> type_of(id->identifier);
     current_expression_value = scopes[i] -> value_of(id->identifier);
+    // Check if an array then get size
+    if (scopes[i]->array_size_table.count(id->identifier))
+        current_array_size = scopes[i]->array_size_table[id->identifier].second;
+    
 
 }
 
@@ -1342,6 +1490,14 @@ std::string visitor::type_str(parser::TYPE t) {
             return "bool";
         case parser::STRING:
             return "string";
+        case parser::INT_ARR:
+            return "int_array";
+        case parser::REAL_ARR:
+            return "float_array";
+        case parser::BOOL_ARR:
+            return "bool_array";
+        case parser::STRING_ARR:
+            return "string_array";
         default:
             throw std::runtime_error("Invalid type encountered.");
     }

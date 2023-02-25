@@ -125,6 +125,12 @@ int main(int args, char* argv[]) {
                 vt.add(std::get<2>(var));
                 vt.endOfRow();
             }
+            for(auto var : global::interpreter_global_scope.array_variable_list()) {
+                vt.add(std::get<0>(var));
+                vt.add(std::get<1>(var));
+                vt.add("[*]");
+                vt.endOfRow();
+            }
             vt.setAlignment(2, TextTable::Alignment::RIGHT);
             std::cout << vt << std::endl;
 

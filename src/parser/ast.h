@@ -41,14 +41,14 @@ namespace parser {
     class ASTDeclarationNode : public ASTStatementNode {
     public:
         ASTDeclarationNode(TYPE, std::string, ASTExprNode*, unsigned int,  bool);
-        ASTDeclarationNode(TYPE, std::string, ASTExprNode**, unsigned int, bool)
-;
+        ASTDeclarationNode(TYPE, std::string, ASTExprNode**, unsigned int, bool, unsigned long int);
         TYPE type;
         std::string identifier;
         ASTExprNode *expr;
         ASTExprNode **array_expr;
         unsigned int line_number;
         bool is_array;
+        unsigned long int array_size;
         void accept(visitor::Visitor*) override;
     };
 	class ASTIncludeNode : public ASTStatementNode {
@@ -62,13 +62,14 @@ namespace parser {
     class ASTAssignmentNode : public ASTStatementNode {
     public:
         ASTAssignmentNode(std::string, ASTExprNode* , unsigned int , bool);
-        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool);
-        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, unsigned int, unsigned int, bool);
+        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, unsigned long int);
+        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, long unsigned int, unsigned int, unsigned int, bool);
         std::string identifier;
         ASTExprNode *expr;
         ASTExprNode **array_expr;
         unsigned int line_number;
         bool is_array;
+        unsigned long int array_size;
         unsigned int first_position;
         unsigned int last_position;
         bool change_range;
