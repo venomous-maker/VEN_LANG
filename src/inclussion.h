@@ -21,5 +21,6 @@ public:
 	static std::string import_program;
     static parser::ASTProgramNode *prog;
     static parser::ASTExprNode *global_simple_expr;
+    static bool generate_xml;
 };
 #endif

@@ -380,7 +380,7 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                     // allocate size for first array element
                     values = (long int *) calloc((decl->array_size), sizeof(long int));
                 }
-                while (size < decl->array_size) {
+                while (size < decl->array_size ) {
                     decl->array_expr[size]->accept(this);;
                     values[size] = current_expression_value.i;
                     // check if the next value occurs in the pointer
@@ -572,6 +572,16 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
 void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
 
     // Determine innermost scope in which variable is declared
+    long unsigned int first_position = 0;
+    long unsigned int last_position = 0;
+    if (assign->first_position !=  nullptr) {
+        assign->first_position->accept(this);
+        first_position = current_expression_value.i;
+    }
+    if (assign->last_position !=  nullptr) {
+        assign->last_position->accept(this);
+        last_position = current_expression_value.i;
+    }
     unsigned long i;
     for (i = scopes.size() - 1; !scopes[i] -> already_declared(assign->identifier); i--);
     
@@ -602,13 +612,29 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                                 current_expression_value.s);
                 break;
             case parser::INT_ARR:
+            {
+                scopes[i]->declare(assign->identifier,
+                                current_expression_value.i_, current_array_size);
                 break;
+            }
             case parser::REAL_ARR:
+            {
+                scopes[i]->declare(assign->identifier,
+                                current_expression_value.r_, current_array_size);
                 break;
+            }
             case parser::BOOL_ARR:
+            {
+                scopes[i]->declare(assign->identifier,
+                                current_expression_value.b_, current_array_size);
                 break;
+            }
             case parser::STRING_ARR:
+                {
+                scopes[i]->declare(assign->identifier,
+                                current_expression_value.s_, current_array_size);
                 break;
+            }
         }
     }
     else{
@@ -628,8 +654,16 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 value_t value = scopes[i]->value_of(assign->identifier);
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : scopes[i]->array_size_table[assign->identifier].second;
+                //  Check indices
+                if (last_position != 0 && first_position > last_position)
+                    throw std::runtime_error("Invalid array indexing in "+assign->identifier+"[ "+std::to_string(first_position)+": "
+                      +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
+                if ((last_position >= size || first_position >= size) && !assign->change_range)
+                    throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
+                      + ". Expected maximum size " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                        : first_position)+".");
                 // Check if only one dimension is given
-                if (assign->last_position == 0) {
+                if (assign->last_position == nullptr) {
                     // Check if we are changing a range or not
                     if (!assign->change_range) {
                         //  Check if expression exists
@@ -637,8 +671,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                             //  Run the first expression only
                             assign -> array_expr[0] -> accept(this);
                             //  Check if the position exists then update
-                            if (value.i_[assign->first_position]) 
-                                value.i_[assign->first_position] = current_expression_value.i;
+                            if (value.i_[first_position]) 
+                                value.i_[first_position] = current_expression_value.i;
                         }
                     }
                     else{
@@ -681,13 +715,13 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 }
                 else{
                     // If a range of values are given
-                    int first = assign->first_position;
-                    int last = assign->last_position;
+                    int first = first_position;
+                    int last = last_position;
                     // Allocate memory for section values
                     long int* section_values = (long int *) calloc((assign->array_size),  sizeof(long int));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (iter < assign->array_size) {
+                    while (iter <= assign->array_size) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.i;
@@ -695,10 +729,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     }
                     // Reinitialize iter to fit the next iteration of swapping
                     iter = 0;
-                    while (first <= last) {
+                    while (first < last) {
                         value.i_[first] = section_values[iter];
-                        ++first;
-                        ++iter;
+                        first++;
+                        iter++;
                     }
                     // Free held section values
                     //free(section_values);
@@ -714,6 +748,14 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
                                                     scopes[i]->array_size_table[assign->identifier].second;
+                // Check indinces
+                if (last_position != 0 && first_position > last_position)
+                    throw std::runtime_error("Invalid array indexing in "+assign->identifier+"[ "+std::to_string(first_position)+": "
+                      +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
+                if ((last_position >= size || first_position >= size) && !assign->change_range)
+                    throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
+                      + ". Expected maximum index " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                        : first_position)+".");
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -723,8 +765,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                             //  Run the first expression only
                             assign -> array_expr[0] -> accept(this);
                             //  Check if the position exists then update
-                            if (value.r_[assign->first_position]) 
-                                value.r_[assign->first_position] = current_expression_value.r;
+                            if (value.r_[first_position]) 
+                                value.r_[first_position] = current_expression_value.r;
                         }
                     }
                     else{
@@ -770,8 +812,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 }
                 else{
                     // If a range of values are given
-                    int first = assign->first_position;
-                    int last = assign->last_position;
+                    int first = first_position;
+                    int last = last_position;
                     // Allocate memory for section values
                     long double* section_values = (long double *) calloc((last - first) + 1, sizeof(long double));
                     int iter = 0;
@@ -804,6 +846,15 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
                                                     scopes[i]->array_size_table[assign->identifier].second;
+                // Check indices
+                if (last_position != 0 && first_position > last_position)
+                    throw std::runtime_error("Invalid array indexing in "+assign->identifier+"[ "+std::to_string(first_position)+": "
+                      +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
+                if ((last_position >= size || first_position >= size) && !assign->change_range)
+                    throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
+                      + ". Expected maximum index " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                        : first_position)+".");
+                
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
                     if (!assign->change_range) {
@@ -812,8 +863,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                             //  Run the first expression only
                             assign -> array_expr[0] -> accept(this);
                             //  Check if the position exists then update
-                            if (value.b_[assign->first_position]) 
-                                value.b_[assign->first_position] = current_expression_value.b;
+                            if (value.b_[first_position]) 
+                                value.b_[first_position] = current_expression_value.b;
                         }
                     }
                     else{
@@ -857,8 +908,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 }
                 else{
                     // If a range of values are given
-                    int first = assign->first_position;
-                    int last = assign->last_position;
+                    int first = first_position;
+                    int last = last_position;
                     // Allocate memory for section values
                     bool* section_values = (bool *) calloc((last - first) + 1, sizeof(bool));
                     int iter = 0;
@@ -890,6 +941,14 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 // Deduct - from size to get the whole array size
                 unsigned long int size = (scopes[i]->array_size_table[assign->identifier].second == 0) ? 0 : 
                                                     scopes[i]->array_size_table[assign->identifier].second;
+                //  Check indices
+                if (last_position != 0 && first_position > last_position)
+                    throw std::runtime_error("Invalid array indexing in "+assign->identifier+"[ "+std::to_string(first_position)+": "
+                      +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
+                if ((last_position >= size || first_position >= size) && !assign->change_range)
+                    throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
+                      + ". Expected maximum index " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                        : first_position)+".");
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
                     // Check if we are changing a range or not
@@ -901,7 +960,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                             //  Check if the position exists then update
                             // This position should be updated
                             if (value.s_) 
-                                value.s_[assign->first_position] = current_expression_value.s;
+                                value.s_[first_position] = current_expression_value.s;
                         }
                     }
                     else{
@@ -944,8 +1003,8 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                 }
                 else{
                     // If a range of values are given
-                    int first = assign->first_position;
-                    int last = assign->last_position;
+                    int first = first_position;
+                    int last = last_position;
                     // Allocate memory for section values
                     std::string* section_values = (std::string *) calloc( ((last - first) + 1), sizeof(std::string));
                     int iter = 0;
@@ -1370,6 +1429,18 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
 
         else if (l_type == parser::STRING)
                 v.b = (op == "==") ? l_value.s == r_value.s : l_value.s != r_value.s;
+        
+        else if(l_type == parser::BOOL_ARR)
+                v.b = (op == "==") ? l_value.b_ == r_value.b_ : l_value.b_ != r_value.b_;
+
+        else if (l_type == parser::STRING_ARR)
+                v.b = (op == "==") ? l_value.s_ == r_value.s_ : l_value.s_ != r_value.s_;
+                
+        else if(l_type == parser::REAL_ARR)
+                v.b = (op == "==") ? l_value.r_ == r_value.r_ : l_value.r_ != r_value.r_;
+
+        else if (l_type == parser::INT_ARR)
+                v.b = (op == "==") ? l_value.i_ == r_value.i_ : l_value.i_ != r_value.i_;
 
         else{
            long double l = l_value.r, r = r_value.r;
@@ -1405,12 +1476,77 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
     for (i = scopes.size() - 1; !scopes[i] -> already_declared(id->identifier); i--);
     
     // Update current expression
-    current_expression_type = scopes[i] -> type_of(id->identifier);
-    current_expression_value = scopes[i] -> value_of(id->identifier);
-    // Check if an array then get size
-    if (scopes[i]->array_size_table.count(id->identifier))
-        current_array_size = scopes[i]->array_size_table[id->identifier].second;
-    
+    // Check if array index is given
+    if (id->array_position !=  nullptr) {
+        // Eat Expression
+        id->array_position->accept(this);
+        unsigned long int index = current_expression_value.i;
+        // Get type of the identifier
+        if (scopes[i]->array_size_table.count(id->identifier))
+            current_array_size = scopes[i]->array_size_table[id->identifier].second;
+        
+        parser::TYPE type = scopes[i] -> type_of(id->identifier);
+        switch (type) {
+            case parser::INT_ARR:
+            {
+                current_expression_type = parser::INT;
+                value_t index_value;
+                if (current_array_size <= index)
+                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                current_expression_value = index_value;
+                break;
+            }
+            case parser::REAL_ARR:
+            {
+                current_expression_type = parser::REAL;
+                value_t index_value;
+                if (current_array_size <= index)
+                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                current_expression_value = index_value;
+                break;
+            }
+            case parser::BOOL_ARR:
+            {
+                current_expression_type = parser::BOOL;
+                value_t index_value;
+                if (current_array_size <= index)
+                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                current_expression_value = index_value;
+                break;
+            }
+            case parser::STRING_ARR:
+            {
+                current_expression_type = parser::STRING;
+                value_t index_value;
+                if (current_array_size <= index)
+                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                current_expression_value = index_value;
+                break;
+            }
+            default:
+                break;
+        }
+        
+    }
+    else{
+        current_expression_type = scopes[i] -> type_of(id->identifier);
+        current_expression_value = scopes[i] -> value_of(id->identifier);
+        // Check if an array then get size
+        if (scopes[i]->array_size_table.count(id->identifier))
+            current_array_size = scopes[i]->array_size_table[id->identifier].second;
+    }
 
 }
 

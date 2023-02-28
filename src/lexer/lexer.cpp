@@ -90,13 +90,15 @@ int Lexer::transition_delta(int s, char sigma) {
         case ')':
         case '{':
         case '}':
+        case ']':
             return transitions[PUNCTUATION][s];
         case '\n':
             return transitions[NEWLINE][s];
-
+        case '[':
+            return transitions[PRINTABLE][s];
         case EOF:
             return transitions[ENDOFFILE][s];
-
+        ;
         default:
             auto ascii = (int) sigma;
 
@@ -129,7 +131,7 @@ Token Lexer::next_token(std::string &program, unsigned int &current_index) {
 
     // Ignore whitespaces or newlines in front of lexeme
     while(current_index < program.length() &&
-          (program[current_index] == ' ' || program[current_index] == '\n'))
+          (program[current_index] == ' ' || program[current_index] == '\n' || program[current_index] == '\t'))
         current_index++;
 
     // Check if EOF

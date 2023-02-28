@@ -43,8 +43,8 @@ ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode *expr, 
         line_number(line_number), 
         is_array(is_array),
         array_size(0), 
-        first_position(0), 
-        last_position(0), 
+        first_position(nullptr), 
+        last_position(nullptr), 
         change_range(false)
 {}
 
@@ -56,13 +56,13 @@ ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode **array
         line_number(line_number), 
         is_array(is_array),
         array_size(array_size),
-        first_position(0), 
-        last_position(0),
-        change_range(false)
+        first_position(nullptr), 
+        last_position(nullptr),
+        change_range(true)
 {}
 
 ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode **array_expr, unsigned int line_number, bool is_array, 
-                                    unsigned long int array_size, unsigned int first_position,  unsigned int last_position, bool change_range) :
+                                    unsigned long int array_size, ASTExprNode* first_position,  ASTExprNode* last_position, bool change_range) :
         identifier(std::move(identifier)),
         expr(nullptr),
         array_expr(array_expr), 
@@ -139,7 +139,14 @@ ASTBinaryExprNode::ASTBinaryExprNode(std::string op, ASTExprNode *left, ASTExprN
 
 ASTIdentifierNode::ASTIdentifierNode(std::string identifier, unsigned int line_number) :
         identifier(std::move(identifier)),
-        line_number(line_number)
+        line_number(line_number), 
+        array_position(nullptr)
+{}
+
+ASTIdentifierNode::ASTIdentifierNode(std::string identifier, unsigned int line_number, ASTExprNode* array_position) :
+        identifier(std::move(identifier)),
+        line_number(line_number), 
+        array_position(array_position)
 {}
 
 ASTUnaryExprNode::ASTUnaryExprNode(std::string unary_op, ASTExprNode *expr, unsigned int line_number) :

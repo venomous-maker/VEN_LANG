@@ -63,15 +63,15 @@ namespace parser {
     public:
         ASTAssignmentNode(std::string, ASTExprNode* , unsigned int , bool);
         ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, unsigned long int);
-        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, long unsigned int, unsigned int, unsigned int, bool);
+        ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, long unsigned int, ASTExprNode*, ASTExprNode*, bool);
         std::string identifier;
         ASTExprNode *expr;
         ASTExprNode **array_expr;
         unsigned int line_number;
         bool is_array;
         unsigned long int array_size;
-        unsigned int first_position;
-        unsigned int last_position;
+        ASTExprNode* first_position;
+        ASTExprNode* last_position;
         bool change_range;
         void accept(visitor::Visitor*) override;
     };
@@ -158,8 +158,10 @@ namespace parser {
     class ASTIdentifierNode : public ASTExprNode {
     public:
         explicit ASTIdentifierNode(std::string, unsigned int);
+        explicit ASTIdentifierNode(std::string, unsigned int,  ASTExprNode*);
         std::string identifier;
         unsigned int line_number;
+        ASTExprNode* array_position;
         void accept(visitor::Visitor*) override;
     };
 

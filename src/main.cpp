@@ -26,7 +26,7 @@ visitor::InterpreterScope global::interpreter_global_scope;
 std::string global::program;
 parser::ASTExprNode *global::global_simple_expr;
 std::string global::global_print_val;
-
+bool global::generate_xml = false;
 // This function displays the help menu
 std::string version = "1.0.0";// Official update version
 string date = "30th January 2023"; //Official update release
@@ -45,9 +45,13 @@ int main(int args, char* argv[]) {
 
     // Indefinite User input
     if (args>1) {
-       std::string arg = argv[1];
-    	if(arg=="-h" || arg =="--h" || arg=="--help" || arg == "-help") {help_menu();}
-    	else {console_args(argv[1]);}
+        int args_ = 1;
+        while (args_ < args) {
+        std::string arg = argv[args_];
+    	if(arg=="-h" || arg =="--h" || arg=="--help" || arg == "-help") {help_menu(); break;}
+        if (arg == "-xml" || arg == "--xml") global::generate_xml = true;
+    	if (args_ + 1 == args) {console_args(argv[1]);}
+        }
     }
     else for(;;){
 

@@ -113,7 +113,7 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
     TYPE type;
     std::string identifier;
     ASTExprNode* expr;
-    ASTExprNode** array_expr;
+    ASTExprNode** array_expr = nullptr;
     ASTExprNode** temp_array_expr;
     unsigned int line_number;
     bool is_array = false;
@@ -141,21 +141,21 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
     if(current_token.type != lexer::TOK_COLON && current_token.type != lexer::TOK_EQUALS && current_token.value != "= " && current_token.value != ": ")
         throw std::runtime_error("Expected assignment operator '=' or ':' for " + identifier + " on line "
                                  + std::to_string(current_token.line_number) + ".");*/
-    if (next_token.type == lexer::TOK_LEFT_SQUARE_BRACKET) {
+    if (next_token.value == "[") {
         is_array = true;
         // Eat [
         consume_token();
         long int size = 0;
         // Allocate memory for first element if ] is not found
-        if (next_token.type != lexer::TOK_RIGHT_SQUARE_BRACKET) {
+        if (next_token.value != "]") {
             array_expr = (ASTExprNode**)malloc(sizeof(ASTExprNode*) * (size+1));
         }
         // Consume elements
-        while(next_token.type != lexer::TOK_RIGHT_SQUARE_BRACKET) {
+        while(next_token.value != "]") {
             array_expr[size] = parse_expression();
             // Check for comma
             //std::cout << next_token.type << " " << next_token.value<<  " " << lexer::TOK_RIGHT_SQUARE_BRACKET << std::endl;
-            if(next_token.type != lexer::TOK_COMMA && next_token.type != lexer::TOK_RIGHT_SQUARE_BRACKET)
+            if(next_token.type != lexer::TOK_COMMA && next_token.value != "]")
                 throw std::runtime_error("Expected ',' or ']' after " + current_token.value +  " on line "
                                  + std::to_string(current_token.line_number) + ".");
             if (next_token.type == lexer::TOK_COMMA) {
@@ -174,7 +174,7 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
         // Eat ]
         consume_token();
         //  Free temporary memory for array
-        if (temp_array_expr) free(temp_array_expr);
+        //if (temp_array_expr) free(temp_array_expr);
         std::string identifier_ = current_token.value;
         consume_token();
         if(current_token.type != lexer::TOK_SEMICOLON)
@@ -203,9 +203,11 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
     // Node attributes
     std::string identifier;
     ASTExprNode* expr;
-    ASTExprNode** array_expr;
+    bool f_pos_only = true;
+    ASTExprNode** array_expr = nullptr;
     ASTExprNode** temp_array_expr;
-    unsigned int line_number;
+    ASTExprNode* first_value = nullptr;
+    ASTExprNode* last_value = nullptr;
     bool is_array = false;
     // Determine line number
     unsigned int line_number = current_token.line_number;
@@ -215,27 +217,104 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
         throw std::runtime_error("Expected variable name after '"+identifier+"' on line "
                                  + std::to_string(current_token.line_number) + ".");
     identifier = current_token.value;
+    
+    if ( next_token.value == "[") {
+        consume_token();
+        long int size = 0;
+        is_array = true;
+        if (next_token.value != "]") {
+            //  Eat expression
+            //consume_token();
+            first_value = parse_expression();
+            // Check if : is present
+            if (next_token.type == lexer::TOK_COLON) {
+                // Consume :
+                consume_token();
+                // Get last index expr
+                last_value = parse_expression();
+            }
+            
+            if (next_token.value != "]")
+                throw std::runtime_error("Expected ] after '"+next_token.value+"' on line "
+                                 + std::to_string(next_token.line_number) + ".");
+            // Eat ]
+            else consume_token();
+            
+            // 
+            if(next_token.type != lexer::TOK_COLON && next_token.type != lexer::TOK_EQUALS && next_token.value != "="/* Some chars maybe taken more than =*/)
+                throw std::runtime_error("Expected assignment operator '=' or ':' after " + current_token.value + " on line "
+                                 + std::to_string(current_token.line_number) + ".");
+            // Eat equal token
+            consume_token();
+            if (last_value ==  nullptr) {
+                // allocate memory for expression
+                size = 1;
+                array_expr = (ASTExprNode**)calloc(size, sizeof(ASTExprNode*)); 
+                array_expr[0] = parse_expression();
+            }
+            else{
+                if (next_token.value == "[") {
+                    // Eat [
+                    consume_token();
+                    // Allocate memory for first element if ] is not found
+                    if (next_token.value != "]") {
+                        array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
+                    }
+                    // Consume elements
+                    while(next_token.value != "]") {
+                        array_expr[size] = parse_expression();
+                        // Check for comma
+                        //std::cout << next_token.type << " " << next_token.value<<  " " << lexer::TOK_RIGHT_SQUARE_BRACKET << std::endl;
+                        if(next_token.type != lexer::TOK_COMMA && next_token.value != "]")
+                            throw std::runtime_error("Expected ',' or ']' after " + current_token.value +  " on line "
+                                            + std::to_string(current_token.line_number) + ".");
+                        if (next_token.type == lexer::TOK_COMMA) {
+                            consume_token();
+                            // Swap and allocate new memory for the elements
+                            temp_array_expr = array_expr;
+                            ++size;
+                            array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
+                            unsigned int iter = 0;
+                            while (iter < size) {
+                                array_expr[iter] = temp_array_expr[iter];
+                                ++iter;
+                            }
+                        }
+                    }
+                    // Eat ]
+                    consume_token();
+                }
+            }
+            if(next_token.type != lexer::TOK_SEMICOLON)
+                throw std::runtime_error("Expected ';' after " + current_token.value + " on line "
+                                        + std::to_string(current_token.line_number) + ".");
+            //  Eat ;
+            consume_token();
+            return new ASTAssignmentNode(identifier, array_expr, line_number, is_array, (array_expr == nullptr)  ? 0:size, first_value, last_value, false);
+        }
+
+    }
 
     consume_token();
     if(current_token.type != lexer::TOK_COLON && current_token.type != lexer::TOK_EQUALS && current_token.value != "="/* Some chars maybe taken more than =*/)
         throw std::runtime_error("Expected assignment operator '=' or ':' after " + identifier + " on line "
                                  + std::to_string(current_token.line_number) + ".");
     
-    if (next_token.type == lexer::TOK_LEFT_SQUARE_BRACKET) {
+    if (next_token.value == "[") {
         is_array = true;
         // Eat [
         consume_token();
         long int size = 0;
         // Allocate memory for first element if ] is not found
-        if (next_token.type != lexer::TOK_RIGHT_SQUARE_BRACKET) {
-            array_expr = (ASTExprNode**)malloc(sizeof(ASTExprNode*) * (size+1));
+        if (next_token.value != "]") {
+            array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
         }
         // Consume elements
-        while(next_token.type != lexer::TOK_RIGHT_SQUARE_BRACKET) {
+        while(next_token.value != "]") {
             array_expr[size] = parse_expression();
             // Check for comma
             //std::cout << next_token.type << " " << next_token.value<<  " " << lexer::TOK_RIGHT_SQUARE_BRACKET << std::endl;
-            if(next_token.type != lexer::TOK_COMMA && next_token.type != lexer::TOK_RIGHT_SQUARE_BRACKET)
+            if(next_token.type != lexer::TOK_COMMA && next_token.value != "]")
                 throw std::runtime_error("Expected ',' or ']' after " + current_token.value +  " on line "
                                  + std::to_string(current_token.line_number) + ".");
             if (next_token.type == lexer::TOK_COMMA) {
@@ -243,7 +322,7 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
                 // Swap and allocate new memory for the elements
                 temp_array_expr = array_expr;
                 ++size;
-                array_expr = (ASTExprNode**)malloc(sizeof(ASTExprNode*) * (size+1));
+                array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
                 unsigned int iter = 0;
                 while (iter < size) {
                     array_expr[iter] = temp_array_expr[iter];
@@ -254,13 +333,17 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
         // Eat ]
         consume_token();
         //  Free temporary memory for array
-        if (temp_array_expr) free(temp_array_expr);
+        //if (temp_array_expr) free(temp_array_expr);
         std::string identifier_ = current_token.value;
         consume_token();
         if(current_token.type != lexer::TOK_SEMICOLON)
             throw std::runtime_error("Expected ';' after assignment of " + identifier_ + " on line "
                                     + std::to_string(current_token.line_number) + ".");
         // Create ASTExpressionNode to return
+        if (last_value !=  nullptr ||  first_value != nullptr) {
+            return new ASTAssignmentNode(identifier, array_expr, line_number, is_array, (array_expr == nullptr)  ? 0:size+1, first_value, last_value, false);
+        }
+        else
         return new ASTAssignmentNode(identifier, array_expr, line_number, is_array, (array_expr == nullptr)  ? 0:size+1);
     }
     // Parse the right hand side
@@ -782,7 +865,20 @@ ASTExprNode* Parser::parse_factor() {
             if(next_token.type == lexer::TOK_LEFT_BRACKET)
                 return parse_function_call();
             else{
-                
+                std::string identifier = current_token.value;
+                // Handling Arrays
+                if (next_token.value == "[") {
+                    consume_token();
+                    // Get array index
+                    ASTExprNode *expr = parse_expression();
+                    // Expect ]
+                    if (next_token.value != "]")
+                        throw std::runtime_error("Expected ']' after "+current_token.value+" on line "
+                                         + std::to_string(current_token.line_number) + ".");
+                    // Eat ]
+                    consume_token();
+                    return new ASTIdentifierNode(identifier, line_number,  expr);
+                }
                 return new ASTIdentifierNode(current_token.value, line_number);
             }
 
