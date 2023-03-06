@@ -41,9 +41,7 @@ namespace lexer {
         ENDOFFILE       = 13,
         LETTER          = 14,
         PRINTABLE       = 15,
-        OTHER           = 16, 
-        RIGHT_PAREN     = 17, 
-        LEFT_PAREN      = 18
+        OTHER           = 16
     };
 
     /**
@@ -104,7 +102,7 @@ namespace lexer {
              * \f$=\delta(j, i)\f$.
              * @see Lexer::transition_delta(int, char)
              */
-            const unsigned int transitions[19][23] = {
+            const unsigned int transitions[17][23] = {
                                      /* S0  S1  S2  S3  S4  S5  S6  S7  S8  S9 S10 S11 S12 S13 S14 S15 S16 S17 S18 S19 S20 S21 S22 */
                 /* DIGIT          */ {   1,  1,  3,  3,  e,  e,  e,  e,  e,  e, 10,  e, 12, 13,  e, 13,  e, 17, 17, 17,  e,  e,  e},
                 /* PERIOD         */ {   3,  3,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e, 12, 13,  e, 13,  e, 17, 17, 17,  e,  e,  e},
@@ -122,9 +120,9 @@ namespace lexer {
                 /* ENDOFFILE      */ {  22,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e},
                 /* LETTER         */ {  10,  e,  e,  e,  e,  e,  e,  e,  e,  e, 10,  e, 12, 13,  e, 13,  e, 17, 17, 17,  e,  e,  e},
                 /* PRINTABLE      */ {   9,  e,  e,  e,  e,  e,  9,  9,  9,  e,  e,  e, 12, 13,  e, 13,  e, 17, 17, 17,  e,  e,  e},
-                /* OTHER          */ {   e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e}, 
-                /* RIGHT_PAREN    */ {  14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 14, 15, 17, 17, 17, 15, 15, 15}, 
-                /* LEFT_PAREN     */ {   6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6, 12, 13,  e, 13,  e, 17, 17, 17,  e,  e,  e,}
+                /* OTHER          */ {   e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e}/*, 
+                RIGHT_PAREN     {  14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 14, 15, 17, 17, 17, 15, 15, 15}, 
+                 LEFT_PAREN      {   6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6, 12, 13,  e, 13,  e, 17, 17, 17,  e,  e,  e,} */
 
             };
 

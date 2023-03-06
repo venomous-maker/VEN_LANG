@@ -27,6 +27,10 @@ std::string global::program;
 parser::ASTExprNode *global::global_simple_expr;
 std::string global::global_print_val;
 bool global::generate_xml = false;
+visitor::SemanticScope global::temp = global::semantic_global_scope;
+visitor::SemanticAnalyser global::temp_semantic_analyser(&temp);
+visitor::SemanticAnalyser global::semantic_analyser(&global::semantic_global_scope);
+visitor::Interpreter global::interpreter(&global::interpreter_global_scope);
 // This function displays the help menu
 std::string version = "1.0.0";// Official update version
 string date = "30th January 2023"; //Official update release
@@ -50,7 +54,8 @@ int main(int args, char* argv[]) {
         std::string arg = argv[args_];
     	if(arg=="-h" || arg =="--h" || arg=="--help" || arg == "-help") {help_menu(); break;}
         if (arg == "-xml" || arg == "--xml") global::generate_xml = true;
-    	if (args_ + 1 == args) {console_args(argv[1]);}
+    	if (args_+1 == args) {console_args(argv[1]);}
+         args_++;
         }
     }
     else for(;;){
@@ -280,7 +285,6 @@ void console_args(std::string fileargs){
     std::string input_line;
     bool file_load = false;
     bool expr = false;
-
         // User prompt
         input_line = fileargs;
 

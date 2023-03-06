@@ -871,13 +871,20 @@ ASTExprNode* Parser::parse_factor() {
                     consume_token();
                     // Get array index
                     ASTExprNode *expr = parse_expression();
+                    ASTExprNode *expr_ = nullptr;
                     // Expect ]
+                    if (next_token.type == lexer::TOK_COLON) {
+                        consume_token();                    // EAT :
+                        // parse_expression
+                        expr_ = parse_expression();
+                    }
                     if (next_token.value != "]")
                         throw std::runtime_error("Expected ']' after "+current_token.value+" on line "
                                          + std::to_string(current_token.line_number) + ".");
-                    // Eat ]
-                    consume_token();
-                    return new ASTIdentifierNode(identifier, line_number,  expr);
+                    else{                                   // Eat ]
+                        consume_token();
+                        return new ASTIdentifierNode(identifier, line_number,  expr,  expr_);
+                    }
                 }
                 return new ASTIdentifierNode(current_token.value, line_number);
             }

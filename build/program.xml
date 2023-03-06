@@ -1,5 +1,26 @@
 <program>
-    <print>
-        <id>i</id>
-    </print>
+    <decl>
+        <id type = "int">i</id>
+        <int>0</int>
+    </decl>
+    <while>
+        <condition>
+            <bin op = "!=">
+                <id>i</id>
+                <int>100000</int>
+            </bin>
+        </condition>
+        <block>
+            <print>
+                <id>i</id>
+            </print>
+            <assign>
+                <id>i</id>
+                <bin op = "+">
+                    <id>i</id>
+                    <int>1</int>
+                </bin>
+            </assign>
+        </block>
+    </while>
 </program>

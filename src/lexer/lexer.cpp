@@ -90,7 +90,6 @@ int Lexer::transition_delta(int s, char sigma) {
         case ')':
         case '{':
         case '}':
-        case ']':
             return transitions[PUNCTUATION][s];
         case '\n':
             return transitions[NEWLINE][s];

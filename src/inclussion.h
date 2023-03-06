@@ -22,5 +22,10 @@ public:
     static parser::ASTProgramNode *prog;
     static parser::ASTExprNode *global_simple_expr;
     static bool generate_xml;
+    static visitor::SemanticScope temp;
+    static visitor::SemanticAnalyser temp_semantic_analyser;
+
+    static visitor::SemanticAnalyser semantic_analyser;
+    static visitor::Interpreter interpreter;
 };
 #endif

@@ -158,10 +158,11 @@ namespace parser {
     class ASTIdentifierNode : public ASTExprNode {
     public:
         explicit ASTIdentifierNode(std::string, unsigned int);
-        explicit ASTIdentifierNode(std::string, unsigned int,  ASTExprNode*);
+        explicit ASTIdentifierNode(std::string, unsigned int,  ASTExprNode*, ASTExprNode*);
         std::string identifier;
         unsigned int line_number;
         ASTExprNode* array_position;
+        ASTExprNode* last_array_position;
         void accept(visitor::Visitor*) override;
     };
 

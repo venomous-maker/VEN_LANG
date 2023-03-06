@@ -511,7 +511,10 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                 //std::cout << decl->array_size;
                 while (size < decl->array_size) {
                     decl->array_expr[size]->accept(this);;
-                    values[size] = current_expression_value.s;
+                    
+                    if (current_expression_value.s.empty())  
+                    values[size] = "";
+                    else values[size] = current_expression_value.s;
                     // check if the next value occurs in the pointer
                     /*if (size+1<decl->array_size)
                     {
@@ -546,11 +549,25 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
         decl -> expr -> accept(this);
         switch(decl -> type){
             case parser::INT:
+                //  Accept arrays too
+                if (current_expression_type ==  parser::INT_ARR)
                 scopes.back()->declare(decl->identifier,
-                                    current_expression_value.i);
+                                    current_expression_value.i_,  current_array_size);
+                // else
+                else
+                    scopes.back()->declare(decl->identifier,
+                                        current_expression_value.i);
                 break;
             case parser::REAL:
-                if(current_expression_type == parser::INT)
+                // Accept arrays too
+                if (current_expression_type ==  parser::INT_ARR)
+                    scopes.back()->declare(decl->identifier,
+                                        (long double*)current_expression_value.i_,  current_array_size);
+                else if (current_expression_type ==  parser::REAL_ARR)
+                    scopes.back()->declare(decl->identifier,
+                                        current_expression_value.r_,  current_array_size);
+                                    
+                else if(current_expression_type == parser::INT)
                     scopes.back()->declare(decl->identifier,
                                         (long double)current_expression_value.i);
                 else
@@ -558,12 +575,22 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                                             current_expression_value.r);
                 break;
             case parser::BOOL:
-                scopes.back()->declare(decl->identifier,
+                // Arrays
+                if (current_expression_type ==  parser::BOOL_ARR)
+                     scopes.back()->declare(decl->identifier,
+                                        current_expression_value.b_,  current_array_size);
+                else scopes.back()->declare(decl->identifier,
                                     current_expression_value.b);
                 break;
             case parser::STRING:
-                scopes.back()->declare(decl->identifier,
+                // Arrays
+                if (current_expression_type ==  parser::REAL_ARR)
+                     scopes.back()->declare(decl->identifier,
+                                        current_expression_value.s_,  current_array_size);
+                else scopes.back()->declare(decl->identifier,
                                     current_expression_value.s);
+                break;
+            default:
                 break;
         }
     }
@@ -815,10 +842,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = first_position;
                     int last = last_position;
                     // Allocate memory for section values
-                    long double* section_values = (long double *) calloc((last - first) + 1, sizeof(long double));
+                    long double* section_values = (long double *) calloc((assign->array_size), sizeof(long double));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (iter < (last - first) + 1) {
+                    while (iter <=  (assign->array_size)) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.r;
@@ -826,7 +853,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     }
                     // Reinitialize iter to fit the next iteration of swapping
                     iter = 0;
-                    while (first <= last) {
+                    while (first < last) {
                         value.r_[first] = section_values[iter];
                         ++first;
                         ++iter;
@@ -911,10 +938,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = first_position;
                     int last = last_position;
                     // Allocate memory for section values
-                    bool* section_values = (bool *) calloc((last - first) + 1, sizeof(bool));
+                    bool* section_values = (bool *) calloc((assign->array_size), sizeof(bool));
                     int iter = 0;
                     // Check next element existance while looping
-                    while (iter < ((last - first) + 1)) {
+                    while (iter <= (assign->array_size)) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.b;
@@ -922,7 +949,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     }
                     // Reinitialize iter to fit the next iteration of swapping
                     iter = 0;
-                    while (first <= last) {
+                    while (first < last) {
                         value.b_[first] = section_values[iter];
                         ++first;
                         ++iter;
@@ -1006,10 +1033,10 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     int first = first_position;
                     int last = last_position;
                     // Allocate memory for section values
-                    std::string* section_values = (std::string *) calloc( ((last - first) + 1), sizeof(std::string));
+                    std::string* section_values = (std::string *) calloc( (assign->array_size), sizeof(std::string));
                     int iter = 0;
                     // Check next element existance while looping
-                    while ( ((last - first) + 1) > iter) {
+                    while ( (assign->array_size) >= iter) {
                         //  Eat expression
                         assign->array_expr[iter]->accept(this);
                         section_values[iter] = current_expression_value.s;
@@ -1017,7 +1044,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     }
                     // Reinitialize iter to fit the next iteration of swapping
                     iter = 0;
-                    while (first <= last) {
+                    while (first < last) {
                         value.s_[first] = section_values[iter];
                         ++first;
                         ++iter;
@@ -1480,7 +1507,13 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
     if (id->array_position !=  nullptr) {
         // Eat Expression
         id->array_position->accept(this);
-        unsigned long int index = current_expression_value.i;
+        long int index = current_expression_value.i;
+        long int last_index = 0;
+        if (id->last_array_position != nullptr) {
+            // Get expression
+            id->last_array_position->accept(this);
+            last_index = current_expression_value.i;
+        }
         // Get type of the identifier
         if (scopes[i]->array_size_table.count(id->identifier))
             current_array_size = scopes[i]->array_size_table[id->identifier].second;
@@ -1489,49 +1522,111 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
         switch (type) {
             case parser::INT_ARR:
             {
-                current_expression_type = parser::INT;
                 value_t index_value;
-                if (current_array_size <= index)
-                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
-                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
-                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                if (id->last_array_position == nullptr) {
+                    current_expression_type = parser::INT;
+                    if (current_array_size <= index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                    index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                }else{
+                    current_expression_type = parser::INT_ARR;
+                    if (current_array_size <= last_index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
+                    long int *i_ = (long int*) calloc(last_index-index, sizeof(long int));
+                    long int iter = 0;
+                    // Update array size
+                    current_array_size = last_index - index;
+                    for (   ;index < last_index; iter++  ) 
+                        i_[iter] = scopes[i] -> value_of(id->identifier).i_[index++];
+                    index_value.i_ = i_;
+                }
                 current_expression_value = index_value;
                 break;
             }
             case parser::REAL_ARR:
             {
-                current_expression_type = parser::REAL;
                 value_t index_value;
-                if (current_array_size <= index)
-                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
-                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
-                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                if (id->last_array_position == nullptr) {
+                    current_expression_type = parser::REAL;
+                    if (current_array_size <= index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                    index_value.r = scopes[i] -> value_of(id->identifier).r_[index];
+                }else{
+                    current_expression_type = parser::REAL_ARR;
+                    if (current_array_size <= last_index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
+                    long double *i_ = (long double*) calloc(last_index-index, sizeof(long double));
+                    long int iter = 0;
+                    // Update array size
+                    current_array_size = last_index - index;
+                    
+                    for (   ;index < last_index; iter++  ) 
+                        i_[iter] = scopes[i] -> value_of(id->identifier).r_[index++];
+                    index_value.r_ = i_;
+                    
+                }
                 current_expression_value = index_value;
                 break;
             }
             case parser::BOOL_ARR:
             {
-                current_expression_type = parser::BOOL;
                 value_t index_value;
-                if (current_array_size <= index)
-                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
-                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
-                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                if (id->last_array_position == nullptr) {
+                    current_expression_type = parser::BOOL;
+                    if (current_array_size <= index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                    index_value.b = scopes[i] -> value_of(id->identifier).b_[index];
+                }else{
+                    current_expression_type = parser::BOOL_ARR;
+                    if (current_array_size <= last_index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
+                    bool *i_ = (bool*) calloc(last_index-index, sizeof(bool));
+                    long int iter = 0;
+                    // Update array size
+                    current_array_size = last_index - index;
+                    for (   ;index < last_index; iter++  ) 
+                        i_[iter] = scopes[i] -> value_of(id->identifier).b_[index++];
+                    index_value.b_ = i_;
+                }
                 current_expression_value = index_value;
                 break;
             }
             case parser::STRING_ARR:
             {
-                current_expression_type = parser::STRING;
                 value_t index_value;
-                if (current_array_size <= index)
-                    throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                      + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
-                      + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
-                index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
+                if (id->last_array_position == nullptr) {
+                    current_expression_type = parser::STRING;
+                    if (current_array_size <= index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
+                    index_value.s = scopes[i] -> value_of(id->identifier).s_[index];
+                }else{
+                    current_expression_type = parser::STRING_ARR;
+                    if (current_array_size <= last_index)
+                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
+                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
+                    std::string* i_ = (std::string*) calloc(last_index-index, sizeof(std::string));
+                    long int iter = 0;
+                    // Update array size
+                    current_array_size = last_index - index;
+                    for (   ;index < last_index; iter++  ) 
+                        i_[iter] = scopes[i] -> value_of(id->identifier).s_[index++];
+                    index_value.s_ = i_;
+                }
                 current_expression_value = index_value;
                 break;
             }
@@ -1644,7 +1739,7 @@ void file_include(std::string fileargs){
     // Indefinite User input
     //for(;;){
     // Variables for user input
-    std::string input_line;
+    std::string input_line, program;
     bool file_load = false;
     bool expr = false;
 
@@ -1674,13 +1769,13 @@ void file_include(std::string fileargs){
                 file.open(file_dir);
 
                 if(!file)
-                    std::cout << "Could not load file from \"" + file_dir + "\"." << std::endl;
+                   throw std::runtime_error("Could not load file from \"" + file_dir + "\".");
 
                 else {
                     // Convert whole program to std::string
                     std::string line;
                     while(std::getline(file, line))
-                        global::program.append(line + "\n");
+                        program.append(line + "\n");
 
                     // Flag to indicate that this statement is for file loading
                     file_load = true;
@@ -1692,7 +1787,7 @@ void file_include(std::string fileargs){
         try {
 
             // Tokenise and initialise parser
-            lexer::Lexer lexer(global::program);
+            lexer::Lexer lexer(program);
             parser::Parser parser(&lexer);
             parser::ASTProgramNode *prog;
 
@@ -1706,11 +1801,11 @@ void file_include(std::string fileargs){
 
                 try {
                     // If expression ends with ';', get rid of it
-                    if (global::program.back() == ';')
-                        global::program.pop_back();
+                    if (program.back() == ';')
+                        program.pop_back();
 
                     // Parse again, create program node manually
-                    lexer::Lexer expr_lexer(global::program);
+                    lexer::Lexer expr_lexer(program);
                     parser = parser::Parser(&expr_lexer, 0);  // do not consume first token
                     prog = new parser::ASTProgramNode(
                             std::vector<parser::ASTNode *>({parser.parse_expression()}));
@@ -1736,7 +1831,7 @@ void file_include(std::string fileargs){
             // If this succeeds, perform semantic analysis modifying global scope
             visitor::SemanticAnalyser semantic_analyser(&global::semantic_global_scope);
             semantic_analyser.visit(prog);
-
+            
             // Interpreter
             visitor::Interpreter interpreter(&global::interpreter_global_scope);
             interpreter.visit(prog);

@@ -206,9 +206,24 @@ void SemanticAnalyser::visit(parser::ASTDeclarationNode *decl){
     }else{
         // Visit the expression to update current type
         decl -> expr -> accept(this);
-
+        // ACCEPT ARRAYS OF THE SAME TYPE AS THE IDENTIFIER
+        if (decl -> type == parser::INT && current_expression_type == parser::INT_ARR) {
+            current_scope->declare(decl->identifier, parser::INT_ARR, decl->line_number, 0);
+        }
+        else if (decl -> type == parser::REAL && current_expression_type == parser::REAL_ARR) {
+            current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number, 0);
+        }
+        else if (decl -> type == parser::BOOL && current_expression_type == parser::BOOL_ARR) {
+            current_scope->declare(decl->identifier, parser::BOOL_ARR, decl->line_number, 0);
+        }
+        else if (decl -> type == parser::REAL && current_expression_type == parser::INT_ARR) {
+            current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number, 0);
+        }
+        else if (decl -> type == parser::STRING && current_expression_type == parser::STRING_ARR) {
+            current_scope->declare(decl->identifier, parser::REAL_ARR, decl->line_number, 0);
+        }
         // allow mismatched type in the case of declaration of int to real
-        if(decl -> type == parser::REAL && current_expression_type == parser::INT)
+        else if(decl -> type == parser::REAL && current_expression_type == parser::INT)
             current_scope->declare(decl->identifier, parser::REAL, decl->line_number, 0);
 
         // types match
@@ -626,6 +641,17 @@ void SemanticAnalyser::visit(parser::ASTIdentifierNode* id) {
             throw std::runtime_error("Expected index of type" + type_str(parser::INT)+",  found "
                 +type_str(current_expression_type)+" when indexing array " + id->identifier +" on line "+std::to_string(id->line_number)+".");
         }
+        // If last position is given in index
+        if (id->last_array_position !=  nullptr) {
+            id->last_array_position->accept(this);
+            if (current_expression_type != parser::INT) {
+                throw std::runtime_error("Expected last index of type" + type_str(parser::INT)+",  found "
+                    +type_str(current_expression_type)+" when indexing array " + id->identifier +" on line "+std::to_string(id->line_number)+".");
+            }
+            // Update current expression type
+            current_expression_type = scopes[i]->type(id->identifier);
+        }
+        else
         // Assign new elemnt current_expression_type
         switch (scopes[i]->type(id->identifier)) {
             case parser::INT_ARR:

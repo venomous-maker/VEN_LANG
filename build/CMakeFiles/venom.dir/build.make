@@ -73,113 +73,113 @@ CMakeFiles/venom.dir/src/main.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/main.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp
 CMakeFiles/venom.dir/src/main.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/venom.dir/src/main.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/main.cpp.o -MF CMakeFiles/venom.dir/src/main.cpp.o.d -o CMakeFiles/venom.dir/src/main.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/main.cpp.o -MF CMakeFiles/venom.dir/src/main.cpp.o.d -o CMakeFiles/venom.dir/src/main.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp
 
 CMakeFiles/venom.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/main.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp > CMakeFiles/venom.dir/src/main.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp > CMakeFiles/venom.dir/src/main.cpp.i
 
 CMakeFiles/venom.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/main.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp -o CMakeFiles/venom.dir/src/main.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/main.cpp -o CMakeFiles/venom.dir/src/main.cpp.s
 
 CMakeFiles/venom.dir/src/lexer/lexer.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/lexer/lexer.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp
 CMakeFiles/venom.dir/src/lexer/lexer.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/venom.dir/src/lexer/lexer.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/lexer/lexer.cpp.o -MF CMakeFiles/venom.dir/src/lexer/lexer.cpp.o.d -o CMakeFiles/venom.dir/src/lexer/lexer.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/lexer/lexer.cpp.o -MF CMakeFiles/venom.dir/src/lexer/lexer.cpp.o.d -o CMakeFiles/venom.dir/src/lexer/lexer.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp
 
 CMakeFiles/venom.dir/src/lexer/lexer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/lexer/lexer.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp > CMakeFiles/venom.dir/src/lexer/lexer.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp > CMakeFiles/venom.dir/src/lexer/lexer.cpp.i
 
 CMakeFiles/venom.dir/src/lexer/lexer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/lexer/lexer.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp -o CMakeFiles/venom.dir/src/lexer/lexer.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.cpp -o CMakeFiles/venom.dir/src/lexer/lexer.cpp.s
 
 CMakeFiles/venom.dir/src/lexer/token.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/lexer/token.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp
 CMakeFiles/venom.dir/src/lexer/token.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/venom.dir/src/lexer/token.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/lexer/token.cpp.o -MF CMakeFiles/venom.dir/src/lexer/token.cpp.o.d -o CMakeFiles/venom.dir/src/lexer/token.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/lexer/token.cpp.o -MF CMakeFiles/venom.dir/src/lexer/token.cpp.o.d -o CMakeFiles/venom.dir/src/lexer/token.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp
 
 CMakeFiles/venom.dir/src/lexer/token.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/lexer/token.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp > CMakeFiles/venom.dir/src/lexer/token.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp > CMakeFiles/venom.dir/src/lexer/token.cpp.i
 
 CMakeFiles/venom.dir/src/lexer/token.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/lexer/token.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp -o CMakeFiles/venom.dir/src/lexer/token.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.cpp -o CMakeFiles/venom.dir/src/lexer/token.cpp.s
 
 CMakeFiles/venom.dir/src/parser/parser.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/parser/parser.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp
 CMakeFiles/venom.dir/src/parser/parser.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/venom.dir/src/parser/parser.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/parser/parser.cpp.o -MF CMakeFiles/venom.dir/src/parser/parser.cpp.o.d -o CMakeFiles/venom.dir/src/parser/parser.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/parser/parser.cpp.o -MF CMakeFiles/venom.dir/src/parser/parser.cpp.o.d -o CMakeFiles/venom.dir/src/parser/parser.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp
 
 CMakeFiles/venom.dir/src/parser/parser.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/parser/parser.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp > CMakeFiles/venom.dir/src/parser/parser.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp > CMakeFiles/venom.dir/src/parser/parser.cpp.i
 
 CMakeFiles/venom.dir/src/parser/parser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/parser/parser.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp -o CMakeFiles/venom.dir/src/parser/parser.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.cpp -o CMakeFiles/venom.dir/src/parser/parser.cpp.s
 
 CMakeFiles/venom.dir/src/parser/ast.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/parser/ast.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp
 CMakeFiles/venom.dir/src/parser/ast.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/venom.dir/src/parser/ast.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/parser/ast.cpp.o -MF CMakeFiles/venom.dir/src/parser/ast.cpp.o.d -o CMakeFiles/venom.dir/src/parser/ast.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/parser/ast.cpp.o -MF CMakeFiles/venom.dir/src/parser/ast.cpp.o.d -o CMakeFiles/venom.dir/src/parser/ast.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp
 
 CMakeFiles/venom.dir/src/parser/ast.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/parser/ast.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp > CMakeFiles/venom.dir/src/parser/ast.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp > CMakeFiles/venom.dir/src/parser/ast.cpp.i
 
 CMakeFiles/venom.dir/src/parser/ast.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/parser/ast.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp -o CMakeFiles/venom.dir/src/parser/ast.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.cpp -o CMakeFiles/venom.dir/src/parser/ast.cpp.s
 
 CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp
 CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o -MF CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o.d -o CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o -MF CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o.d -o CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp
 
 CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp > CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp > CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.i
 
 CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp -o CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp -o CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.s
 
 CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp
 CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o -MF CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o.d -o CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o -MF CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o.d -o CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp
 
 CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp > CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp > CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.i
 
 CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp -o CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.cpp -o CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.s
 
 CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o: CMakeFiles/venom.dir/flags.make
 CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp
 CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o: CMakeFiles/venom.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o -MF CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o.d -o CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o -MF CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o.d -o CMakeFiles/venom.dir/src/visitor/interpreter.cpp.o -c /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp
 
 CMakeFiles/venom.dir/src/visitor/interpreter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/venom.dir/src/visitor/interpreter.cpp.i"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp > CMakeFiles/venom.dir/src/visitor/interpreter.cpp.i
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp > CMakeFiles/venom.dir/src/visitor/interpreter.cpp.i
 
 CMakeFiles/venom.dir/src/visitor/interpreter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/venom.dir/src/visitor/interpreter.cpp.s"
-	g++-11 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp -o CMakeFiles/venom.dir/src/visitor/interpreter.cpp.s
+	g++-10 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.cpp -o CMakeFiles/venom.dir/src/visitor/interpreter.cpp.s
 
 # Object files for target venom
 venom_OBJECTS = \

@@ -140,13 +140,15 @@ ASTBinaryExprNode::ASTBinaryExprNode(std::string op, ASTExprNode *left, ASTExprN
 ASTIdentifierNode::ASTIdentifierNode(std::string identifier, unsigned int line_number) :
         identifier(std::move(identifier)),
         line_number(line_number), 
-        array_position(nullptr)
+        array_position(nullptr), 
+        last_array_position(nullptr)
 {}
 
-ASTIdentifierNode::ASTIdentifierNode(std::string identifier, unsigned int line_number, ASTExprNode* array_position) :
+ASTIdentifierNode::ASTIdentifierNode(std::string identifier, unsigned int line_number, ASTExprNode* array_position,  ASTExprNode* last_array_position) :
         identifier(std::move(identifier)),
         line_number(line_number), 
-        array_position(array_position)
+        array_position(array_position),
+        last_array_position(last_array_position)
 {}
 
 ASTUnaryExprNode::ASTUnaryExprNode(std::string unary_op, ASTExprNode *expr, unsigned int line_number) :
