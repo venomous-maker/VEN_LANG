@@ -4,6 +4,7 @@
 */
 
 #include "semantic_analysis.h"
+#include "../inclussion.h"
 #include <utility>
 #include <iostream>
 
@@ -362,9 +363,12 @@ void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {
                                     ", found " + type_str(current_expression_type) + ".");
     }
 }
+
+
 void SemanticAnalyser::visit(parser::ASTIncludeNode *includ){
 	// Update current expression
     includ -> file_name;
+    visitor::file_include(includ -> file_name);
 }
 void SemanticAnalyser::visit(parser::ASTPrintNode *print) {
 
@@ -799,4 +803,116 @@ bool SemanticAnalyser::returns(parser::ASTStatementNode* stmt){
 
     // Other statements do not return
     else return false;
+}
+
+void visitor::file_include(std::string fileargs){
+
+    // Indefinite User input
+    //for(;;){
+    // Variables for user input
+    std::string input_line, program;
+    bool file_load = false;
+    bool expr = false;
+
+        // User prompt
+        input_line = fileargs+".vn";
+
+        // Remove leading/trailing whitespaces
+        input_line = std::regex_replace(input_line, std::regex("^ +| +$"), "$1");
+
+            //std::cout << input_line << std::endl; Unnecessary
+
+            // If length <= 6, then the user specified no file
+            if(input_line.size() == 0){
+                std::cout << "File path expected as an argument" << std::endl;
+            }
+
+            else{
+
+                // Get file directory
+                std::string file_dir = input_line.substr(0);
+
+                // Remove any whitespaces from that
+                file_dir = std::regex_replace(file_dir, std::regex("^ +| +$"), "$1");
+
+                // Read the file
+                std::ifstream file;
+                file.open(file_dir);
+
+                if(!file)
+                   throw std::runtime_error("Could not load file from \"" + file_dir + "\".");
+
+                else {
+                    // Convert whole program to std::string
+                    std::string line;
+                    while(std::getline(file, line))
+                        program.append(line + "\n");
+
+                    // Flag to indicate that this statement is for file loading
+                    file_load = true;
+                }
+
+                file.close();
+            }
+
+        try {
+
+            // Tokenise and initialise parser
+            lexer::Lexer lexer(program);
+            parser::Parser parser(&lexer);
+            parser::ASTProgramNode *prog;
+
+            // Try to parse as program
+            try {
+                prog = parser.parse_program();
+            }
+
+            // Catch by trying to parse as expression
+            catch(const std::exception &e) {
+
+                try {
+                    // If expression ends with ';', get rid of it
+                    if (program.back() == ';')
+                        program.pop_back();
+
+                    // Parse again, create program node manually
+                    lexer::Lexer expr_lexer(program);
+                    parser = parser::Parser(&expr_lexer, 0);  // do not consume first token
+                    prog = new parser::ASTProgramNode(
+                            std::vector<parser::ASTNode *>({parser.parse_expression()}));
+
+                    expr = true;
+                } catch(const std::exception &expr_e) {
+
+                    // Throw original error
+                    throw std::runtime_error(e.what());
+                }
+            }
+    // Generate XML
+            visitor::XMLVisitor xml_generator;
+            xml_generator.visit(prog);
+
+
+            // Try to analyse in a temporary copy of the global scope (just in case
+            // the program is invalid)
+            //visitor::SemanticScope temp = global::semantic_global_scope;
+            //visitor::SemanticAnalyser temp_semantic_analyser(&temp);
+            //temp_semantic_analyser.visit(prog);
+
+            // If this succeeds, perform semantic analysis modifying global scope
+            visitor::SemanticAnalyser semantic_analyser(&global::semantic_global_scope);
+            semantic_analyser.visit(prog);
+            
+            // Interpreter
+            visitor::Interpreter interpreter(&global::interpreter_global_scope);
+            interpreter.visit(prog);
+
+            // If loading file, show user that everything went well
+            /*if (file_load)
+                std::cout << "\nEnd of program Execution" << std::endl;*/ // Not necessary
+        }
+     // Catch exception and print error
+        catch(const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+        }
 }

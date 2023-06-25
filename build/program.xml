@@ -5,9 +5,9 @@
     </decl>
     <while>
         <condition>
-            <bin op = "!=">
+            <bin op = "&lt;=">
                 <id>i</id>
-                <int>100000</int>
+                <int>1000000000</int>
             </bin>
         </condition>
         <block>

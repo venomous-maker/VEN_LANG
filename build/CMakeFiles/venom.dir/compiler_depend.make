@@ -2141,7 +2141,18 @@ CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o: /home/venom/Desktop/mo
   /usr/include/c++/10/unordered_set \
   /usr/include/c++/10/bits/unordered_set.h \
   /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.h \
-  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/visitor.h
+  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/visitor.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/inclussion.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/lexer/token.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/parser/parser.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/lexer/lexer.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/visitor.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/parser/ast.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/semantic_analysis.h \
+  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/interpreter.h
 
 CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o: /home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp \
   /usr/include/stdc-predef.h \

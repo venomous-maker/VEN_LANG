@@ -687,7 +687,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                       +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
                 if ((last_position >= size || first_position >= size) && !assign->change_range)
                     throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
-                      + ". Expected maximum size " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                      + ". Expected maximum size " +((size == 0)  ? "NULL":std::to_string(size-1))+", found "+std::to_string((last_position >= size) ? last_position
                         : first_position)+".");
                 // Check if only one dimension is given
                 if (assign->last_position == nullptr) {
@@ -781,7 +781,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                       +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
                 if ((last_position >= size || first_position >= size) && !assign->change_range)
                     throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
-                      + ". Expected maximum index " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                      + ". Expected maximum index " +((size == 0)  ? "NULL":std::to_string(size-1))+", found "+std::to_string((last_position >= size) ? last_position
                         : first_position)+".");
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
@@ -879,7 +879,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                       +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
                 if ((last_position >= size || first_position >= size) && !assign->change_range)
                     throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
-                      + ". Expected maximum index " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                      + ". Expected maximum index " +((size == 0)  ? "NULL":std::to_string(size-1))+", found "+std::to_string((last_position >= size) ? last_position
                         : first_position)+".");
                 
                 if (assign->last_position == 0) {
@@ -974,7 +974,7 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                       +std::to_string(last_position)+", on line "+std::to_string(assign->line_number)+".");
                 if ((last_position >= size || first_position >= size) && !assign->change_range)
                     throw std::runtime_error("Array index out of bound in array "+assign->identifier+ " on line "+std::to_string(assign->line_number)
-                      + ". Expected maximum index " +std::to_string((size == 0)  ? 0:size-1)+", found "+std::to_string((last_position >= size) ? last_position
+                      + ". Expected maximum index " +((size == 0)  ? "NULL":std::to_string(size-1))+", found "+std::to_string((last_position >= size) ? last_position
                         : first_position)+".");
                 // Check if only one dimension is given
                 if (assign->last_position == 0) {
@@ -1136,11 +1136,12 @@ void visitor::Interpreter::visit(parser::ASTPrintNode *print){
     std:cout<<"\n";
 }
 
-void file_include(std::string fileargs);
+// void file_include(std::string fileargs);
 void visitor::Interpreter::visit(parser::ASTIncludeNode *includ){
-	//includ->file_path/*->accept(this)*/;
-	//cout<<current_expression_value.s;
-	file_include(includ->file_name);
+    /**
+     *@Nothing here
+     **/
+     
 }
 void visitor::Interpreter::visit(parser::ASTReturnNode *ret) {
     // Update current expression
@@ -1526,15 +1527,15 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
                 if (id->last_array_position == nullptr) {
                     current_expression_type = parser::INT;
                     if (current_array_size <= index)
-                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        throw std::runtime_error("Array index out of bound when indexing '" + id->identifier
+                        + "'. Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
                     index_value.i = scopes[i] -> value_of(id->identifier).i_[index];
                 }else{
                     current_expression_type = parser::INT_ARR;
                     if (current_array_size <= last_index)
-                        throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        throw std::runtime_error("Array index out of bound when indexing '" + id->identifier
+                        + "'. Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
                     long int *i_ = (long int*) calloc(last_index-index, sizeof(long int));
                     long int iter = 0;
@@ -1554,14 +1555,14 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
                     current_expression_type = parser::REAL;
                     if (current_array_size <= index)
                         throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + ".Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
                     index_value.r = scopes[i] -> value_of(id->identifier).r_[index];
                 }else{
                     current_expression_type = parser::REAL_ARR;
                     if (current_array_size <= last_index)
                         throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + ".Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
                     long double *i_ = (long double*) calloc(last_index-index, sizeof(long double));
                     long int iter = 0;
@@ -1583,14 +1584,14 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
                     current_expression_type = parser::BOOL;
                     if (current_array_size <= index)
                         throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + ".Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
                     index_value.b = scopes[i] -> value_of(id->identifier).b_[index];
                 }else{
                     current_expression_type = parser::BOOL_ARR;
                     if (current_array_size <= last_index)
                         throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + ".Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
                     bool *i_ = (bool*) calloc(last_index-index, sizeof(bool));
                     long int iter = 0;
@@ -1610,14 +1611,14 @@ void visitor::Interpreter::visit(parser::ASTIdentifierNode *id) {
                     current_expression_type = parser::STRING;
                     if (current_array_size <= index)
                         throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + ".Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(index)+" on line "+ std::to_string(id->line_number)+".");
                     index_value.s = scopes[i] -> value_of(id->identifier).s_[index];
                 }else{
                     current_expression_type = parser::STRING_ARR;
                     if (current_array_size <= last_index)
                         throw std::runtime_error("Array index out of bound when indexing " + id->identifier
-                        + ".Expected maximum index of "+std::to_string(current_array_size)+", found an invalid index "
+                        + ".Expected maximum index of "+((current_array_size == 0) ? "NULL":std::to_string( current_array_size-1))+", found an invalid index "
                         + std::to_string(last_index)+" on line "+ std::to_string(id->line_number)+".");
                     std::string* i_ = (std::string*) calloc(last_index-index, sizeof(std::string));
                     long int iter = 0;
@@ -1734,114 +1735,3 @@ std::string visitor::type_str(parser::TYPE t) {
     }
 }
 
-void file_include(std::string fileargs){
-
-    // Indefinite User input
-    //for(;;){
-    // Variables for user input
-    std::string input_line, program;
-    bool file_load = false;
-    bool expr = false;
-
-        // User prompt
-        input_line = fileargs+".vn";
-
-        // Remove leading/trailing whitespaces
-        input_line = std::regex_replace(input_line, std::regex("^ +| +$"), "$1");
-
-            //std::cout << input_line << std::endl; Unnecessary
-
-            // If length <= 6, then the user specified no file
-            if(input_line.size() == 0){
-                std::cout << "File path expected as an argument" << std::endl;
-            }
-
-            else{
-
-                // Get file directory
-                std::string file_dir = input_line.substr(0);
-
-                // Remove any whitespaces from that
-                file_dir = std::regex_replace(file_dir, std::regex("^ +| +$"), "$1");
-
-                // Read the file
-                std::ifstream file;
-                file.open(file_dir);
-
-                if(!file)
-                   throw std::runtime_error("Could not load file from \"" + file_dir + "\".");
-
-                else {
-                    // Convert whole program to std::string
-                    std::string line;
-                    while(std::getline(file, line))
-                        program.append(line + "\n");
-
-                    // Flag to indicate that this statement is for file loading
-                    file_load = true;
-                }
-
-                file.close();
-            }
-
-        try {
-
-            // Tokenise and initialise parser
-            lexer::Lexer lexer(program);
-            parser::Parser parser(&lexer);
-            parser::ASTProgramNode *prog;
-
-            // Try to parse as program
-            try {
-                prog = parser.parse_program();
-            }
-
-            // Catch by trying to parse as expression
-            catch(const std::exception &e) {
-
-                try {
-                    // If expression ends with ';', get rid of it
-                    if (program.back() == ';')
-                        program.pop_back();
-
-                    // Parse again, create program node manually
-                    lexer::Lexer expr_lexer(program);
-                    parser = parser::Parser(&expr_lexer, 0);  // do not consume first token
-                    prog = new parser::ASTProgramNode(
-                            std::vector<parser::ASTNode *>({parser.parse_expression()}));
-
-                    expr = true;
-                } catch(const std::exception &expr_e) {
-
-                    // Throw original error
-                    throw std::runtime_error(e.what());
-                }
-            }
-    // Generate XML
-            visitor::XMLVisitor xml_generator;
-            xml_generator.visit(prog);
-
-
-            // Try to analyse in a temporary copy of the global scope (just in case
-            // the program is invalid)
-            visitor::SemanticScope temp = global::semantic_global_scope;
-            visitor::SemanticAnalyser temp_semantic_analyser(&temp);
-            temp_semantic_analyser.visit(prog);
-
-            // If this succeeds, perform semantic analysis modifying global scope
-            visitor::SemanticAnalyser semantic_analyser(&global::semantic_global_scope);
-            semantic_analyser.visit(prog);
-            
-            // Interpreter
-            visitor::Interpreter interpreter(&global::interpreter_global_scope);
-            interpreter.visit(prog);
-
-            // If loading file, show user that everything went well
-            /*if (file_load)
-                std::cout << "\nEnd of program Execution" << std::endl;*/ // Not necessary
-        }
-     // Catch exception and print error
-        catch(const std::exception &e) {
-            std::cerr << e.what() << std::endl;
-        }
-}

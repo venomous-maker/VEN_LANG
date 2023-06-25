@@ -243,8 +243,8 @@ int main(int args, char* argv[]) {
             interpreter.visit(prog);
 
             // If loading file, show user that everything went well
-            if (file_load)
-                std::cout << "File loaded successfully." << std::endl;
+            if (file_load);
+                //std::cout << "File loaded successfully." << std::endl;
 
             // If expression, show user output
             else if(expr){
@@ -367,9 +367,9 @@ void console_args(std::string fileargs){
 
             // Try to analyse in a temporary copy of the global scope (just in case
             // the program is invalid)
-            visitor::SemanticScope temp = global::semantic_global_scope;
-            visitor::SemanticAnalyser temp_semantic_analyser(&temp);
-            temp_semantic_analyser.visit(prog);
+            //visitor::SemanticScope temp = global::semantic_global_scope;
+            //visitor::SemanticAnalyser temp_semantic_analyser(&temp);
+            //temp_semantic_analyser.visit(prog);
 
             // If this succeeds, perform semantic analysis modifying global scope
             visitor::SemanticAnalyser semantic_analyser(&global::semantic_global_scope);

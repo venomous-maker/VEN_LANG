@@ -305,4 +305,15 @@ CMakeFiles/venom.dir/src/visitor/semantic_analysis.cpp.o: \
  /usr/include/c++/10/unordered_set \
  /usr/include/c++/10/bits/unordered_set.h \
  /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../parser/ast.h \
- /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../parser/../visitor/visitor.h
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../parser/../visitor/visitor.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../inclussion.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../lexer/lexer.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../lexer/token.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../parser/parser.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../parser/ast.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../parser/../lexer/lexer.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../visitor/xml_visitor.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../visitor/visitor.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../visitor/../parser/ast.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../visitor/semantic_analysis.h \
+ /home/venom/Desktop/morgan/venom_interpreter/src/visitor/../visitor/interpreter.h

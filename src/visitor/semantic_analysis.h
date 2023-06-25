@@ -14,6 +14,7 @@
 
 namespace visitor {
 
+    void file_include(std::string);
     class SemanticScope {
     public:
         bool already_declared(std::string);
