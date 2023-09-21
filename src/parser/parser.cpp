@@ -88,12 +88,16 @@ ASTStatementNode* Parser::parse_statement() {
 
         case lexer::TOK_INCLUDE:
             return parse_include();
+            
 		case lexer::TOK_REAL_TYPE:
 			return parse_declaration_statement();
+			
 		case lexer::TOK_INT_TYPE:
 			return parse_declaration_statement();
+			
 		case lexer::TOK_STRING_TYPE:
 			return parse_declaration_statement();
+			
 		case lexer::TOK_BOOL_TYPE:
 			return parse_declaration_statement();
         default:

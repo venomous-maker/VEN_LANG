@@ -262,6 +262,62 @@ int main(int args, char* argv[]) {
                     case parser::STRING:
                         std::cout << current.second.s;
                         break;
+                    case parser::STRING_ARR:{
+                        int i = 0;
+                        unsigned long int current_array_size = interpreter.get_current_array_size();
+                        // Output array element
+                        //int * temp = (int*)current_expression_value.s_;
+                        std::cout << "[";
+                        while (current_array_size > i) {
+                            std::cout << " "<< current.second.s_[i];
+                            if (current_array_size > i+1) std::cout << ",";
+                            else break;
+                            i++;
+                        }
+                        std::cout << "]";
+                        break;
+                    }
+                    case parser::INT_ARR:{
+                        int i = 0;
+                        // Output array element
+                        // long int * l = current_expression_value.i_;
+                        unsigned long int current_array_size = interpreter.get_current_array_size();
+                        std::cout << "[";
+                        while (i < current_array_size) {
+                            std::cout << current.second.i_[i];
+                            if (current_array_size > i+1) std::cout << ",";
+                            else break;
+                            ++i;
+                        }
+                        std::cout << "]";
+                        break;
+                    }
+                    case parser::REAL_ARR:{
+                        int i = 0;
+                        // Output array element
+                        unsigned long int current_array_size = interpreter.get_current_array_size();
+                        std::cout << "[";
+                        while (i < current_array_size) {
+                            std::cout << current.second.r_[i];
+                            if (current_array_size > i+1) std::cout << ","; else break;
+                            i++;
+                        }
+                        std::cout << "]";
+                        break;
+                    }
+                    case parser::BOOL_ARR:{
+                        int i = 0;
+                        // Output array element
+                        unsigned long int current_array_size = interpreter.get_current_array_size();
+                        std::cout << "[";
+                        while (current_array_size > i) {
+                            std::cout << ((current.second.b_[i]) ? "true" : "false");
+                            if (current_array_size > i+1) std::cout << ","; else break;
+                            i++;
+                        }
+                        std::cout << "]";
+                        break;
+                    }
                 }
             }
         }

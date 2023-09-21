@@ -1,26 +1,3 @@
 <program>
-    <decl>
-        <id type = "int">i</id>
-        <int>0</int>
-    </decl>
-    <while>
-        <condition>
-            <bin op = "&lt;=">
-                <id>i</id>
-                <int>1000000000</int>
-            </bin>
-        </condition>
-        <block>
-            <print>
-                <id>i</id>
-            </print>
-            <assign>
-                <id>i</id>
-                <bin op = "+">
-                    <id>i</id>
-                    <int>1</int>
-                </bin>
-            </assign>
-        </block>
-    </while>
+    <id>ar</id>
 </program>

@@ -92,6 +92,7 @@ namespace visitor {
         void visit(parser::ASTFunctionCallNode*) override;
 
         std::pair<parser::TYPE, value_t> current_expr();
+        unsigned long int get_current_array_size(void);
 
     private:
         std::vector<InterpreterScope*> scopes;

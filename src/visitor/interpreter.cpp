@@ -1710,6 +1710,11 @@ std::pair<parser::TYPE, value_t> Interpreter::current_expr(){
                                     current_expression_value));
 };
 
+unsigned long visitor::Interpreter::get_current_array_size()
+{
+    return this->current_array_size;
+}
+
 
 std::string visitor::type_str(parser::TYPE t) {
 

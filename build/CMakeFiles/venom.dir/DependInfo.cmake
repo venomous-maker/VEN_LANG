@@ -18,8 +18,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/venom/Desktop/morgan/venom_interpreter/src/visitor/xml_visitor.cpp" "CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o" "gcc" "CMakeFiles/venom.dir/src/visitor/xml_visitor.cpp.o.d"
   )
 
-# Targets to which this target links.
-set(CMAKE_TARGET_LINKED_INFO_FILES
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.
