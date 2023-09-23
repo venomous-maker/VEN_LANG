@@ -137,7 +137,7 @@ int main(int args, char* argv[]) {
             for(auto var : global::interpreter_global_scope.array_variable_list()) {
                 vt.add(std::get<0>(var));
                 vt.add(std::get<1>(var));
-                vt.add("[*]");
+                vt.add((std::get<2>(var) == nullptr) ? "[NULL]" : "["+std::get<2>(var)[0]+", ...]");
                 vt.endOfRow();
             }
             vt.setAlignment(2, TextTable::Alignment::RIGHT);

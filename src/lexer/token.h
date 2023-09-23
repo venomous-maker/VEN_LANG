@@ -54,7 +54,9 @@ namespace lexer {
         TOK_INCLUDE,
         TOK_FOR,
         TOK_RIGHT_SQUARE_BRACKET, 
-        TOK_LEFT_SQUARE_BRACKET
+        TOK_LEFT_SQUARE_BRACKET, 
+        TOK_APPEND,
+        TOK_PERIOD
     };
 
     /**

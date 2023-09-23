@@ -25,16 +25,20 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
             return TOK_INT;
 
         case 3:
-            return TOK_REAL;
+            if (value == ".")
+                return TOK_PERIOD;
+            else
+                return TOK_REAL;
 
         case 4:
             return TOK_ADDITIVE_OP;
 
         case 5:
         case 11:
-            if (value == "!") return TOK_NOT;
+            if (value == "!") 
+                return TOK_NOT;
             else
-            return TOK_MULTIPLICATIVE_OP;
+                return TOK_MULTIPLICATIVE_OP;
 
         case 7:
             return TOK_RELATIONAL_OP;
@@ -43,13 +47,17 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
             return TOK_EQUALS;
 
         case 9:
-            if (value ==  "$") return TOK_SET;
-            else if (value == "[") return TOK_LEFT_SQUARE_BRACKET;
-            else if (value == "]") return TOK_RIGHT_SQUARE_BRACKET;
-            else return TOK_RELATIONAL_OP;
+            if (value ==  "$") 
+                return TOK_SET;
+            else if (value == "[") 
+                return TOK_LEFT_SQUARE_BRACKET;
+            else if (value == "]") 
+                return TOK_RIGHT_SQUARE_BRACKET;
+            else 
+                return TOK_RELATIONAL_OP;
 
         case 10:
-		if(value == "include" || value =="import" || value == "load")
+            if(value == "include" || value =="import" || value == "load")
                 return TOK_INCLUDE;
             if(value == "var" || value == "variable" || value == "attribute")
                 return TOK_VAR;
@@ -91,6 +99,8 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
                return TOK_MULTIPLICATIVE_OP;
             if(value == "not")
                 return TOK_NOT;
+            if (value == "append" || value ==  "push")
+                return TOK_APPEND;
             else return TOK_IDENTIFIER;
 
         case 14:

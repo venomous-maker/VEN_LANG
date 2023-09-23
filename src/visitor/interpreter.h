@@ -90,6 +90,7 @@ namespace visitor {
         void visit(parser::ASTIdentifierNode*) override;
         void visit(parser::ASTUnaryExprNode*) override;
         void visit(parser::ASTFunctionCallNode*) override;
+        void visit(parser::ASTAppendNode*) override;
 
         std::pair<parser::TYPE, value_t> current_expr();
         unsigned long int get_current_array_size(void);

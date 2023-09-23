@@ -388,6 +388,63 @@ void SemanticAnalyser::visit(parser::ASTReturnNode *ret) {
                                  type_str(current_expression_type) + ".");
 }
 
+void SemanticAnalyser::visit(parser::ASTAppendNode* append)
+{
+    // Determine the inner-most scope in which the value is declared
+    unsigned long j;
+    for (j = scopes.size() - 1; !scopes[j] -> already_declared(append->identifier); j--)
+        if(j <= 0)
+            throw std::runtime_error("Array '" + append->identifier + "' being appended on line " +
+                                     std::to_string(append->line_number) + " was never declared " +
+                                     ((scopes.size() == 1) ? "globally." : "in this scope."));
+
+
+    // Get the type of the originally declared array
+    parser::TYPE type = scopes[j]->type(append->identifier);
+    
+    // update current expr
+    append->expression->accept(this);
+    
+    switch (type) {
+        case parser::INT_ARR:
+        {
+            if (current_expression_type != parser::INT)
+                throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
+                                                std::to_string(append->line_number) + ". Expected to append " + type_str(parser::INT) +
+                                            ", found expression of type " + type_str(current_expression_type) + ".");
+            break;
+        }
+        case parser::REAL_ARR:
+        {
+            if (current_expression_type != parser::INT && current_expression_type != parser::REAL)
+                throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
+                                                std::to_string(append->line_number) + ". Expected to append " + type_str(parser::REAL) +
+                                            ", found expression of type " + type_str(current_expression_type) + ".");
+            break;
+        }
+        case parser::BOOL_ARR:
+        {
+            if (current_expression_type != parser::BOOL)
+                throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
+                                                std::to_string(append->line_number) + ". Expected to append " + type_str(parser::BOOL) +
+                                            ", found expression of type " + type_str(current_expression_type) + ".");
+            break;
+        }
+        case parser::STRING_ARR:
+        {
+            if (current_expression_type != parser::STRING)
+                throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
+                                                std::to_string(append->line_number) + ". Expected to append" + type_str(parser::STRING) +
+                                            ", found expression of type " + type_str(current_expression_type) + ".");
+            break;
+        }
+        default:
+            break;
+    }
+    
+}
+
+
 void SemanticAnalyser::visit(parser::ASTBlockNode *block) {
 
     // Create new scope
@@ -766,13 +823,13 @@ std::string type_str(parser::TYPE t) {
         case parser::STRING:
             return "string";
             case parser::INT_ARR:
-            return "int_array";
+            return "int[]";
         case parser::REAL_ARR:
-            return "float_array";
+            return "float[]";
         case parser::BOOL_ARR:
-            return "bool_array";
+            return "bool[]";
         case parser::STRING_ARR:
-            return "string_array";
+            return "string[]";
         default:
             throw std::runtime_error("Invalid type encountered.");
     }

@@ -322,7 +322,7 @@ void XMLVisitor::visit(parser::ASTLiteralNode<long int> *lit) {
 void XMLVisitor::visit(parser::ASTLiteralNode<long int*> *lit) {
 
     // Add initial <int> tag
-    xmlfile << indentation() << "<int_array>";
+    xmlfile << indentation() << "<int[]>";
 
     // Add value
     int iter = 0;
@@ -333,7 +333,7 @@ void XMLVisitor::visit(parser::ASTLiteralNode<long int*> *lit) {
     }
     indentation_level--;
     // Add closing tag
-    xmlfile << "</int_array>" << std::endl;
+    xmlfile << "</int[]>" << std::endl;
 }
 
 
@@ -349,10 +349,34 @@ void XMLVisitor::visit(parser::ASTLiteralNode<long double> *lit) {
     xmlfile << "</real>" << std::endl;
 }
 
+void XMLVisitor::visit(parser::ASTAppendNode* lit)
+{
+    xmlfile << indentation() << "<append>";
+    indentation_level++;
+        xmlfile << "array";
+            indentation_level++;
+            xmlfile <<"name";
+                indentation_level++;
+                xmlfile << lit->identifier;
+            indentation_level--;
+            xmlfile << "</name>";
+            xmlfile <<"value";
+                indentation_level++;
+                lit ->expression->accept(this);
+                indentation_level--;
+            xmlfile << "</value";
+            indentation_level--;
+        xmlfile << "</array>";
+    indentation_level--;
+    xmlfile << "</append>";
+    
+}
+
+
 void XMLVisitor::visit(parser::ASTLiteralNode<long double*> *lit) {
 
     // Add initial <int> tag
-    xmlfile << indentation() << "<float_array>";
+    xmlfile << indentation() << "<float[]>";
 
     // Add value
     int iter = 0;
@@ -363,7 +387,7 @@ void XMLVisitor::visit(parser::ASTLiteralNode<long double*> *lit) {
     }
     indentation_level--;
     // Add closing tag
-    xmlfile << "</float_array>" << std::endl;
+    xmlfile << "</float[]>" << std::endl;
 }
 
 void XMLVisitor::visit(parser::ASTLiteralNode<bool> *lit) {
@@ -381,7 +405,7 @@ void XMLVisitor::visit(parser::ASTLiteralNode<bool> *lit) {
 void XMLVisitor::visit(parser::ASTLiteralNode<bool*> *lit) {
 
     // Add initial <bool> tag
-    xmlfile << indentation() << "<bool_array>";
+    xmlfile << indentation() << "<bool[]>";
 
     // Add value
     int iter = 0;
@@ -392,7 +416,7 @@ void XMLVisitor::visit(parser::ASTLiteralNode<bool*> *lit) {
     }
     indentation_level--;
     // Add closing tag
-    xmlfile << "</bool_array>" << std::endl;
+    xmlfile << "</bool[]>" << std::endl;
 }
 
 void XMLVisitor::visit(parser::ASTLiteralNode<std::string> *lit) {
@@ -410,18 +434,18 @@ void XMLVisitor::visit(parser::ASTLiteralNode<std::string> *lit) {
 void XMLVisitor::visit(parser::ASTLiteralNode<std::string*> *lit) {
 
     // Add initial <int> tag
-    xmlfile << indentation() << "<string_array>";
+    xmlfile << indentation() << "<string[]>";
 
     // Add value
     int iter = 0;
     indentation_level++;
-    while (lit->val) {
+    while (lit->val !=  NULL) {
         xmlfile << "Value " << iter+1<< ": "<< lit->val++ << "\n";
         iter++;
     }
     indentation_level--;
     // Add closing tag
-    xmlfile << "</string_array>" << std::endl;
+    xmlfile << "</string[]>" << std::endl;
 }
 
 void XMLVisitor::visit(parser::ASTBinaryExprNode *bin) {

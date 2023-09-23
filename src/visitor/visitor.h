@@ -20,6 +20,7 @@ namespace parser {
     class ASTIfNode;
     class ASTWhileNode;
     class ASTIncludeNode;
+    class ASTAppendNode;
     class ASTFunctionDefinitionNode;
 
     template <typename T> class ASTLiteralNode;
@@ -37,6 +38,7 @@ namespace visitor {
 
         virtual void visit(parser::ASTProgramNode*) = 0;
         virtual void visit(parser::ASTIncludeNode*) = 0;
+        virtual void visit(parser::ASTAppendNode*) = 0;
         virtual void visit(parser::ASTDeclarationNode*) = 0;
         virtual void visit(parser::ASTAssignmentNode*) = 0;
         virtual void visit(parser::ASTPrintNode*) = 0;

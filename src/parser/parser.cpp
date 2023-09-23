@@ -60,14 +60,17 @@ ASTProgramNode* Parser::parse_program() {
 }
 
 ASTStatementNode* Parser::parse_statement() {
+    //std::cout << current_token.type <<  std::endl;
     switch(current_token.type){
-
         /*case lexer::TOK_VAR:
             return parse_declaration_statement();*/
 
         case lexer::TOK_SET:
             return parse_assignment_statement();
-
+        
+        case lexer::TOK_APPEND:
+            return parse_append_statement();
+        
         case lexer::TOK_PRINT:
             return parse_print_statement();
 
@@ -165,14 +168,15 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
             if (next_token.type == lexer::TOK_COMMA) {
                 consume_token();
                 // Swap and allocate new memory for the elements
-                temp_array_expr = array_expr;
+                //temp_array_expr = array_expr;
                 ++size;
-                array_expr = (ASTExprNode**)malloc(sizeof(ASTExprNode*) * (size+1));
-                unsigned int iter = 0;
-                while (iter < size) {
-                    array_expr[iter] = temp_array_expr[iter];
-                    ++iter;
-                }
+                array_expr = (ASTExprNode**)realloc(array_expr, (size + 1) * sizeof(ASTExprNode*));
+                //array_expr = (ASTExprNode**)malloc(sizeof(ASTExprNode*) * (size+1));
+                //unsigned int iter = 0;
+                //while (iter < size) {
+                //    array_expr[iter] = temp_array_expr[iter];
+                //    ++iter;
+                //}
             }
         }
         // Eat ]
@@ -275,14 +279,15 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
                         if (next_token.type == lexer::TOK_COMMA) {
                             consume_token();
                             // Swap and allocate new memory for the elements
-                            temp_array_expr = array_expr;
+                            //temp_array_expr = array_expr;
                             ++size;
-                            array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
-                            unsigned int iter = 0;
-                            while (iter < size) {
-                                array_expr[iter] = temp_array_expr[iter];
-                                ++iter;
-                            }
+                            //array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
+                            array_expr = (ASTExprNode**)realloc(array_expr, (size + 1) * sizeof(ASTExprNode*));
+                            //unsigned int iter = 0;
+                            //while (iter < size) {
+                            //    array_expr[iter] = temp_array_expr[iter];
+                            //    ++iter;
+                            //}
                         }
                     }
                     // Eat ]
@@ -324,14 +329,15 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
             if (next_token.type == lexer::TOK_COMMA) {
                 consume_token();
                 // Swap and allocate new memory for the elements
-                temp_array_expr = array_expr;
+                //temp_array_expr = array_expr;
                 ++size;
-                array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
-                unsigned int iter = 0;
-                while (iter < size) {
-                    array_expr[iter] = temp_array_expr[iter];
-                    ++iter;
-                }
+                //array_expr = (ASTExprNode**)calloc(size+1, sizeof(ASTExprNode*));
+                array_expr = (ASTExprNode**)realloc(array_expr, (size + 1) * sizeof(ASTExprNode*));
+                //unsigned int iter = 0;
+                //while (iter < size) {
+                //    array_expr[iter] = temp_array_expr[iter];
+                //    ++iter;
+                //}
             }
         }
         // Eat ]
@@ -360,6 +366,47 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
                                  + std::to_string(current_token.line_number) + ".");
 
     return new ASTAssignmentNode(identifier, expr, line_number, false);
+}
+
+// here
+ASTAppendNode * Parser::parse_append_statement()
+{
+    ASTExprNode* expression = nullptr;
+    unsigned int line_number = current_token.line_number;
+    std::string identifier = current_token.value;
+    consume_token();
+	// Make sure it's a '('
+    if(current_token.type != lexer::TOK_LEFT_BRACKET)
+        throw std::runtime_error("Expected '(' after "+ identifier +" on line "
+                                 + std::to_string(current_token.line_number) + ".");
+    
+    // Consume identifier
+    consume_token();
+    if(current_token.type != lexer::TOK_IDENTIFIER)
+        throw std::runtime_error("Expected array name after '(' on line "
+                                 + std::to_string(current_token.line_number) + ".");
+    identifier = current_token.value;
+    
+    if (next_token.type !=  lexer::TOK_COMMA)
+        throw std::runtime_error("Expected ',' after "+ identifier +" on line "
+                                 + std::to_string(current_token.line_number) + ".");
+    // Eat, 
+    consume_token();
+    // Eat expression
+    expression = parse_expression();
+    
+    if (next_token.type !=  lexer::TOK_RIGHT_BRACKET)
+        throw std::runtime_error("Expected ')' after "+ current_token.value +" on line "
+                                 + std::to_string(current_token.line_number) + ".");
+    //  Eat )
+    consume_token();
+    
+    if (next_token.type !=  lexer::TOK_SEMICOLON)
+        throw std::runtime_error("Expected ';' after "+ current_token.value +" on line "
+                                 + std::to_string(current_token.line_number) + ".");
+    //eat;
+    consume_token();
+    return new ASTAppendNode(identifier,  expression,  line_number);
 }
 
 ASTPrintNode* Parser::parse_print_statement() {
@@ -555,32 +602,34 @@ ASTIfNode* Parser::parse_if_statement() {
             consume_token();
         // foresee if
         if(next_token.type == lexer::TOK_IF){
-            i = i + 1;
+            i++;
             // Memory swapping
             // Allocate memory size for temp = real
-            temp_else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i-1));
-            temp_else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i-1));
+            //temp_else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i-1));
+            //temp_else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i-1));
             // Assign
-            temp_else_condition = else_condition;
-            temp_else_if_block = else_if_block;
+            //temp_else_condition = else_condition;
+            //temp_else_if_block = else_if_block;
             // Allocate new memory for block and condition pointers
-            else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i));
-            else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i));
-            int j = 0;
+            //else_condition = (ASTExprNode**)malloc(sizeof(ASTExprNode*)*(i));
+            else_condition = (ASTExprNode**)realloc(else_condition, (i) * sizeof(ASTExprNode*));
+            //else_if_block = (ASTBlockNode**)malloc(sizeof(ASTBlockNode*)*(i));
+            else_if_block = (ASTBlockNode**)realloc(else_if_block, (i) * sizeof(ASTBlockNode*));
+            //int j = 0;
             // Swapp
-            while(temp_else_condition[j]){
-                else_condition[j] = temp_else_condition[j];
-                else_if_block[j] = temp_else_if_block[j];
-                ++j;
-            }
+            //while(temp_else_condition[j]){
+            //    else_condition[j] = temp_else_condition[j];
+            //    else_if_block[j] = temp_else_if_block[j];
+            //    ++j;
+            //}
             
         }
     }
     // Releasing temporary memory allocation
-    if(temp_else_condition){
+    /*if(temp_else_condition){
         free(temp_else_condition);
         free(temp_else_if_block);
-    }
+    } */
     // Consume '{' after else
     consume_token();
     if(current_token.type != lexer::TOK_LEFT_CURLY)
@@ -890,6 +939,7 @@ ASTExprNode* Parser::parse_factor() {
                         return new ASTIdentifierNode(identifier, line_number,  expr,  expr_);
                     }
                 }
+                
                 return new ASTIdentifierNode(current_token.value, line_number);
             }
 

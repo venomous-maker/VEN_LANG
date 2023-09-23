@@ -94,6 +94,12 @@ ASTBlockNode::ASTBlockNode(std::vector<ASTStatementNode*> statements, unsigned i
         line_number(line_number)
 {}
 
+ASTAppendNode::ASTAppendNode(std::string identifier, ASTExprNode* expression, unsigned int line_number) :
+        identifier(std::move(identifier)), 
+        expression(expression),
+        line_number(line_number)
+{}
+
 ASTIfNode::ASTIfNode(ASTExprNode* condition, ASTBlockNode *if_block, unsigned int line_number,ASTBlockNode** else_if_block, ASTExprNode **else_if_conditions, 
                      ASTBlockNode *else_block) :
         condition(condition),
@@ -259,5 +265,10 @@ void ASTIncludeNode::accept(visitor::Visitor *v){
     v -> visit(this);
 }
 void ASTProgramNode::accept(visitor::Visitor *v){
+    v -> visit(this);
+}
+
+void parser::ASTAppendNode::accept(visitor::Visitor* v)
+{
     v -> visit(this);
 }

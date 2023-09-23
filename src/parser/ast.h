@@ -75,6 +75,15 @@ namespace parser {
         bool change_range;
         void accept(visitor::Visitor*) override;
     };
+    
+    class ASTAppendNode :  public ASTStatementNode {
+    public:
+        ASTAppendNode(std::string,  ASTExprNode*, unsigned int);
+        std::string identifier;
+        ASTExprNode* expression;
+        unsigned int line_number;
+        void accept(visitor::Visitor * ) override;
+    };
 
     class ASTPrintNode : public ASTStatementNode {
     public:
@@ -139,9 +148,11 @@ namespace parser {
     template <typename T>
     class ASTLiteralNode : public ASTExprNode {
     public:
-        ASTLiteralNode(T val, unsigned int line_number) : val(val), line_number(line_number) {};
+        ASTLiteralNode(T val, unsigned int line_number) : val(val), line_number(line_number), array_size(0){};
+        ASTLiteralNode(T val, unsigned int line_number,  unsigned int array_size) : val(val), line_number(line_number), array_size(array_size){};
         T val;
         unsigned int line_number;
+        unsigned int array_size;
         void accept(visitor::Visitor*) override;
     };
 

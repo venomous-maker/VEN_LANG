@@ -1,3 +1,5 @@
 <program>
-    <id>ar</id>
+    <unary op = "-">
+        <int>5</int>
+    </unary>
 </program>

@@ -41,6 +41,7 @@ namespace parser {
             ASTIfNode*                    parse_if_statement();
             ASTWhileNode*                 parse_while_statement();
             ASTFunctionDefinitionNode*    parse_function_definition();
+            ASTAppendNode*                parse_append_statement();
 
             // Expression Nodes
             ASTExprNode*               parse_simple_expression();

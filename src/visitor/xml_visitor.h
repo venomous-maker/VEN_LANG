@@ -40,6 +40,7 @@ namespace visitor{
         void visit(parser::ASTIdentifierNode*) override;
         void visit(parser::ASTUnaryExprNode*) override;
         void visit(parser::ASTFunctionCallNode*) override;
+        void visit(parser::ASTAppendNode*) override;
 
     private:
         std::ofstream xmlfile;
