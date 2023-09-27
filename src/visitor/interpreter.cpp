@@ -339,7 +339,7 @@ void visitor::Interpreter::visit(parser::ASTDeclarationNode *decl) {
                 decl -> type = parser::BOOL_ARR;
                 scopes.back()->declare(decl->identifier,
                                     values,  (decl->array_size > 0) ? decl->array_size:0);
-                if (values) free(values);
+                //if (values) free(values);
                 break;
             }
             case parser::STRING:
@@ -444,8 +444,53 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
     for (i = scopes.size() - 1; !scopes[i] -> already_declared(assign->identifier); i--);
     
     if (!assign->is_array)
-    {                                                       // Visit expression node to update current value/type
+    {
+        // Visit expression node to update current value/type
         assign -> expr -> accept(this);
+        if (assign->require_input) {
+            switch (current_expression_type) {
+                case parser::INT:
+                {
+                    std::cout << current_expression_value.i;
+                    break;
+                }
+                case parser::BOOL:
+                {
+                    std::cout << (current_expression_value.b  ? "true" : "false");
+                    break;
+                }
+                case parser::STRING:
+                {
+                    std::cout << current_expression_value.s;
+                    break;
+                }
+                default:
+                    break;
+            }
+            
+            std::string input;
+            std::cin >> input;
+            switch (scopes[i]->type_of(assign->identifier)) {
+                case parser::INT:
+                    current_expression_type = parser::INT;
+                    current_expression_value.i = std::stol(input);
+                    break;
+                case parser::REAL:
+                    current_expression_type = parser::REAL;
+                    current_expression_value.r = std::stold(input);
+                    break;
+                case parser::BOOL:
+                    current_expression_type = parser::BOOL;
+                    current_expression_value.b = (input == "true");
+                    break;
+                case parser::STRING:
+                    current_expression_type = parser::STRING;
+                    current_expression_value.s = input;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         // Redeclare variable, depending on type
         switch(scopes[i]->type_of(assign->identifier)){
@@ -778,7 +823,6 @@ void visitor::Interpreter::visit(parser::ASTAssignmentNode *assign) {
                     }
                     else{
                         std::string *values = nullptr;
-                        std::string *temp_values = nullptr;
                         
                         size = 0;
                         // check if the first value occurs in the pointer
@@ -833,7 +877,7 @@ void visitor::Interpreter::visit(parser::ASTAppendNode* append)
 {
     unsigned long i;
     for (i = scopes.size() - 1; !scopes[i] -> already_declared(append->identifier); i--);
-    if(i <= 0)
+    if(i < 0)
         throw std::runtime_error("Array '" + append->identifier + "' being appended on line " +
                                     std::to_string(append->line_number) + " was never declared " +
                                     ((scopes.size() == 1) ? "globally." : "in this scope."));
@@ -886,11 +930,14 @@ void visitor::Interpreter::visit(parser::ASTAppendNode* append)
         {
             if (current_expression_type != parser::STRING)
                 throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
-                                                std::to_string(append->line_number) + ". Expected to append" + type_str(parser::STRING) +
+                                                std::to_string(append->line_number) + ". Expected to append " + type_str(parser::STRING) +
                                             ", found expression of type " + type_str(current_expression_type) + ".");
             auto size = scopes[i]->array_size_table[append->identifier].second;
             auto value = scopes[i]->value_of(append->identifier);
-            value.s_ = (std::string*) realloc(value.s_,  sizeof(std::string) * (size+1));
+            if (value.s_ !=  nullptr) {
+                value.s_ = (std::string*) realloc(value.s_,  sizeof(std::string) * (size+1));
+            }
+            else value.s_ = (std::string *) calloc((1), sizeof(std::string));
             value.s_[size] = current_expression_value.s;
             scopes[i]->declare(append->identifier,
                                 value.s_, (value.s_) ? size+1:0);
@@ -1184,7 +1231,7 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
     value_t v;
 
     // Arithmetic operators for now
-    if(op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^" || op =="!#") {
+    if(op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^" || op =="!#" || op == "//") {
         // Two ints
         if(l_type == parser::INT && r_type == parser::INT){
             current_expression_type = parser::INT;
@@ -1195,32 +1242,32 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
             else if(op == "^")
             {
                 if(r_value.i>=0){
-		        v.i = round(pow(l_value.i, r_value.i));
-		}else{
-		        current_expression_type = parser::REAL; // Declare this as a float execution
-		        v.r = 1/pow(l_value.i, abs(r_value.i)); //powers for values raised to -val
-		}
+                    v.i = round(pow(l_value.i, r_value.i));
+                }else{
+                    current_expression_type = parser::REAL; // Declare this as a float execution
+                    v.r = 1/pow(l_value.i, abs(r_value.i)); //powers for values raised to -val
+                }
             }
             else if(op == "*")
                 v.i = l_value.i * r_value.i;
             else if (op == "%")
-	        v.i = l_value.i % r_value.i;
-	    else if (op == "!#"){ //factorial
-	    	if(r_value.i>l_value.i){
-	    		throw std::runtime_error("Factorial limit greater than the parent value encountered on line "
-                                             + std::to_string(bin->line_number) + ".");
-	    	}else{
-		    	long int mini_val = 1;
-		    	long double result = l_value.i;
-		    	if (r_value.i==0) mini_val = 1;
-		    	else mini_val = r_value.i;
-		    	for(long double dec_res=result-1;dec_res>=mini_val;dec_res--){
-		    		result = result* dec_res;
-		    	}
-		    	current_expression_type = parser::REAL;
-		    	v.r = result;
-		    }
-	    }
+                v.i = l_value.i % r_value.i;
+            else if (op == "!#"){ //factorial
+                if(r_value.i>l_value.i){
+                    throw std::runtime_error("Factorial limit greater than the parent value encountered on line "
+                                                + std::to_string(bin->line_number) + ".");
+                }else{
+                    long int mini_val = 1;
+                    long double result = l_value.i;
+                    if (r_value.i==0) mini_val = 1;
+                    else mini_val = r_value.i;
+                    for(long double dec_res=result-1;dec_res>=mini_val;dec_res--){
+                        result = result* dec_res;
+                    }
+                    current_expression_type = parser::REAL;
+                    v.r = result;
+                }
+            }
             else if(op == "/") {
                 if(r_value.i == 0)
                     throw std::runtime_error("Division by zero encountered on line "
@@ -1279,7 +1326,20 @@ void visitor::Interpreter::visit(parser::ASTBinaryExprNode *bin) {
         // Remaining case is for strings
         else {
             current_expression_type = parser::STRING;
-            v.s = l_value.s + r_value.s;
+            std::string l = l_value.s, r = r_value.s;
+            if(l_type == parser::INT)
+                l = std::to_string(l_value.i);
+            if(r_type == parser::INT)
+                r = std::to_string(r_value.i);
+            if(l_type == parser::REAL)
+                l = std::to_string(l_value.r);
+            if(r_type == parser::REAL)
+                r = std::to_string(r_value.r);
+            if(l_type == parser::BOOL)
+                l = l_value.b  ? "true" : "false";
+            if(r_type == parser::BOOL)
+                r = r_value.b ? "true" : "false";
+            v.s = l + r;
         }
     }
     // Now bool
@@ -1579,6 +1639,8 @@ std::string visitor::type_str(parser::TYPE t) {
             return "bool[]";
         case parser::STRING_ARR:
             return "string[]";
+        case parser::FILE_:
+            return "file";
         default:
             throw std::runtime_error("Invalid type encountered.");
     }

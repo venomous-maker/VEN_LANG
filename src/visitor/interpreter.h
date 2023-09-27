@@ -22,6 +22,7 @@ namespace visitor {
         long double *r_;
         bool* b_;
         std::string *s_;
+        FILE file;
     } value_t;
 
 

@@ -12,7 +12,7 @@
 namespace parser {
 
     // TypeZ
-    enum TYPE {INT, REAL, BOOL, STRING, INT_ARR, REAL_ARR, BOOL_ARR,  STRING_ARR};
+    enum TYPE {INT, REAL, BOOL, STRING, INT_ARR, REAL_ARR, BOOL_ARR,  STRING_ARR, FILE_};
 
     // Abstract Nodes
     class ASTNode {
@@ -61,7 +61,7 @@ namespace parser {
 	};
     class ASTAssignmentNode : public ASTStatementNode {
     public:
-        ASTAssignmentNode(std::string, ASTExprNode* , unsigned int , bool);
+        ASTAssignmentNode(std::string, ASTExprNode* , unsigned int , bool, bool);
         ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, unsigned long int);
         ASTAssignmentNode(std::string, ASTExprNode** , unsigned int , bool, long unsigned int, ASTExprNode*, ASTExprNode*, bool);
         std::string identifier;
@@ -69,6 +69,7 @@ namespace parser {
         ASTExprNode **array_expr;
         unsigned int line_number;
         bool is_array;
+        bool require_input;
         unsigned long int array_size;
         ASTExprNode* first_position;
         ASTExprNode* last_position;

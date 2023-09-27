@@ -94,6 +94,7 @@ int Lexer::transition_delta(int s, char sigma) {
         case '\n':
             return transitions[NEWLINE][s];
         case '[':
+        case ']':
             return transitions[PRINTABLE][s];
         case EOF:
             return transitions[ENDOFFILE][s];

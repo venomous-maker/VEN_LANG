@@ -36,12 +36,13 @@ ASTDeclarationNode::ASTDeclarationNode(TYPE type, std::string identifier, ASTExp
     is_array(is_array), 
     array_size(array_size)
 {}
-ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode *expr, unsigned int line_number, bool is_array) :
+ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode *expr, unsigned int line_number, bool is_array,  bool require_input) :
         identifier(std::move(identifier)),
         expr(expr),
         array_expr(nullptr), 
         line_number(line_number), 
         is_array(is_array),
+        require_input(require_input),
         array_size(0), 
         first_position(nullptr), 
         last_position(nullptr), 
@@ -55,6 +56,7 @@ ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode **array
         array_expr(array_expr), 
         line_number(line_number), 
         is_array(is_array),
+        require_input(false), 
         array_size(array_size),
         first_position(nullptr), 
         last_position(nullptr),
@@ -68,6 +70,7 @@ ASTAssignmentNode::ASTAssignmentNode(std::string identifier, ASTExprNode **array
         array_expr(array_expr), 
         line_number(line_number), 
         is_array(is_array),
+        require_input(false), 
         array_size(array_size), 
         first_position(first_position), 
         last_position(last_position), 

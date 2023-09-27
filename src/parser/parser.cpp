@@ -60,12 +60,13 @@ ASTProgramNode* Parser::parse_program() {
 }
 
 ASTStatementNode* Parser::parse_statement() {
-    //std::cout << current_token.type <<  std::endl;
+    std::cout << current_token.type <<  std::endl;
     switch(current_token.type){
         /*case lexer::TOK_VAR:
             return parse_declaration_statement();*/
 
         case lexer::TOK_SET:
+            this->assign_without_set_token = false;
             return parse_assignment_statement();
         
         case lexer::TOK_APPEND:
@@ -97,7 +98,8 @@ ASTStatementNode* Parser::parse_statement() {
 			
 		case lexer::TOK_INT_TYPE:
 			return parse_declaration_statement();
-			
+        case lexer::TOK_IDENTIFIER:
+            return parse_identifier_statement();
 		case lexer::TOK_STRING_TYPE:
 			return parse_declaration_statement();
 			
@@ -110,6 +112,29 @@ ASTStatementNode* Parser::parse_statement() {
                                      std::to_string(current_token.line_number) + ".");
     }
 }
+
+parser::ASTStatementNode * parser::Parser::parse_identifier_statement()
+{
+    //std::cout << "Here "<< next_token.type <<  std::endl;
+    if (next_token.type == lexer::TOK_EQUALS) {
+        assign_without_set_token = true;
+        return parse_assignment_statement();
+    }
+    if (next_token.type == lexer::TOK_PERIOD) {
+        period_based_identifier = current_token.value;
+        period_based_line_number = current_token.line_number;
+        // Eat .
+        consume_token();
+        return parse_append_statement();
+    }
+    else{
+        throw std::runtime_error("Invalid statement starting with '" +
+                                     current_token.value
+                                     + "' encountered on line " +
+                                     std::to_string(current_token.line_number) + ".");
+    }
+}
+
 /*
 * @std declaration as of Feb 2023 
 * var_type var_name = val;
@@ -139,6 +164,7 @@ ASTDeclarationNode* Parser::parse_declaration_statement() {
     identifier = current_token.value;
 
     consume_token();
+    //std::cout << "Here: " << current_token.value << std::endl;
     // During the assignment an extra space might be parsed handle it in the operator
     if(current_token.type != lexer::TOK_COLON && current_token.type != lexer::TOK_EQUALS && current_token.value != "=" && current_token.value != ":")
         throw std::runtime_error("Expected ':' or '=' after '" + identifier + "' on line "
@@ -217,14 +243,19 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
     ASTExprNode* first_value = nullptr;
     ASTExprNode* last_value = nullptr;
     bool is_array = false;
+    bool hanging_range = false;
+    bool hanging_range_l = false;
     // Determine line number
     unsigned int line_number = current_token.line_number;
 	identifier = current_token.value;
-    consume_token();
-    if(current_token.type != lexer::TOK_IDENTIFIER)
-        throw std::runtime_error("Expected variable name after '"+identifier+"' on line "
-                                 + std::to_string(current_token.line_number) + ".");
-    identifier = current_token.value;
+	bool require_input = false;
+	if (!this->assign_without_set_token) {
+        consume_token();
+        if(current_token.type != lexer::TOK_IDENTIFIER)
+            throw std::runtime_error("Expected variable name after '"+identifier+"' on line "
+                                    + std::to_string(current_token.line_number) + ".");
+        identifier = current_token.value;
+    }
     
     if ( next_token.value == "[") {
         consume_token();
@@ -233,13 +264,20 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
         if (next_token.value != "]") {
             //  Eat expression
             //consume_token();
-            first_value = parse_expression();
+            if (next_token.type != lexer::TOK_COLON)
+                first_value = parse_expression();
+            else hanging_range = true;
             // Check if : is present
             if (next_token.type == lexer::TOK_COLON) {
                 // Consume :
                 consume_token();
                 // Get last index expr
-                last_value = parse_expression();
+                if (next_token.value != "]") {
+                    //std::cout << next_token.value << endl;
+                    last_value = parse_expression();
+                }else{
+                    hanging_range_l = true;
+                }
             }
             
             if (next_token.value != "]")
@@ -254,7 +292,7 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
                                  + std::to_string(current_token.line_number) + ".");
             // Eat equal token
             consume_token();
-            if (last_value ==  nullptr) {
+            if (last_value ==  nullptr && !hanging_range_l) {
                 // allocate memory for expression
                 size = 1;
                 array_expr = (ASTExprNode**)calloc(size, sizeof(ASTExprNode*)); 
@@ -357,15 +395,36 @@ ASTAssignmentNode* Parser::parse_assignment_statement() {
         return new ASTAssignmentNode(identifier, array_expr, line_number, is_array, (array_expr == nullptr)  ? 0:size+1);
     }
     // Parse the right hand side
-    expr = parse_expression();
-    global::global_simple_expr = expr;
-
+    if (next_token.type == lexer::TOK_INPUT)
+    {
+        //  Consume input token
+        consume_token();
+        if (next_token.type == lexer::TOK_LEFT_BRACKET) {
+            // Eat (
+            consume_token();
+        }
+        else throw std::runtime_error("Expected '(' after " + current_token.value + " on line "
+                                 + std::to_string(current_token.line_number) + ".");
+        require_input = true;
+        expr = parse_expression();
+        if (next_token.type == lexer::TOK_RIGHT_BRACKET) {
+            // Eat )
+            consume_token();
+        }
+        else throw std::runtime_error("Expected ')' after " + current_token.value + " on line "
+                                 + std::to_string(current_token.line_number) + ".");
+        
+    }
+    else{
+        expr = parse_expression();
+        global::global_simple_expr = expr;
+    }
     consume_token();
     if(current_token.type != lexer::TOK_SEMICOLON)
         throw std::runtime_error("Expected ';' after assignment of " + identifier + " on line "
                                  + std::to_string(current_token.line_number) + ".");
 
-    return new ASTAssignmentNode(identifier, expr, line_number, false);
+    return new ASTAssignmentNode(identifier, expr, line_number, false, require_input);
 }
 
 // here
@@ -374,24 +433,35 @@ ASTAppendNode * Parser::parse_append_statement()
     ASTExprNode* expression = nullptr;
     unsigned int line_number = current_token.line_number;
     std::string identifier = current_token.value;
+    std::string keyword = identifier;
+    bool period_exists = current_token.type == lexer::TOK_PERIOD;
+    if (period_exists) {
+        identifier = period_based_identifier;
+        line_number = period_based_line_number;
+        // Eat append keyword
+        consume_token();
+        keyword = current_token.value;
+        
+    }
     consume_token();
 	// Make sure it's a '('
     if(current_token.type != lexer::TOK_LEFT_BRACKET)
-        throw std::runtime_error("Expected '(' after "+ identifier +" on line "
+        throw std::runtime_error("Expected '(' after "+ keyword +" on line "
                                  + std::to_string(current_token.line_number) + ".");
-    
-    // Consume identifier
-    consume_token();
-    if(current_token.type != lexer::TOK_IDENTIFIER)
-        throw std::runtime_error("Expected array name after '(' on line "
-                                 + std::to_string(current_token.line_number) + ".");
-    identifier = current_token.value;
-    
-    if (next_token.type !=  lexer::TOK_COMMA)
-        throw std::runtime_error("Expected ',' after "+ identifier +" on line "
-                                 + std::to_string(current_token.line_number) + ".");
-    // Eat, 
-    consume_token();
+    if (!period_exists) {
+        // Consume identifier
+        consume_token();
+        if(current_token.type != lexer::TOK_IDENTIFIER)
+            throw std::runtime_error("Expected array name after '(' on line "
+                                    + std::to_string(current_token.line_number) + ".");
+        identifier = current_token.value;
+        
+        if (next_token.type !=  lexer::TOK_COMMA)
+            throw std::runtime_error("Expected ',' after "+ identifier +" on line "
+                                    + std::to_string(current_token.line_number) + ".");
+        // Eat, 
+        consume_token();
+    }
     // Eat expression
     expression = parse_expression();
     
@@ -927,7 +997,7 @@ ASTExprNode* Parser::parse_factor() {
                     ASTExprNode *expr_ = nullptr;
                     // Expect ]
                     if (next_token.type == lexer::TOK_COLON) {
-                        consume_token();                    // EAT :
+                        consume_token(); // EAT :
                         // parse_expression
                         expr_ = parse_expression();
                     }
@@ -959,7 +1029,7 @@ ASTExprNode* Parser::parse_factor() {
             return new ASTUnaryExprNode(current_token.value, parse_expression(), line_number);
 
         default:
-            throw std::runtime_error("Expected expression on line "
+            throw std::runtime_error("Expected expression near "+current_token.value+" on line "
                                      + std::to_string(current_token.line_number) + ".");
 
     }

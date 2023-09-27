@@ -244,7 +244,7 @@ void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {
     // Determine the inner-most scope in which the value is declared
     unsigned long j;
     for (j = scopes.size() - 1; !scopes[j] -> already_declared(assign->identifier); j--)
-        if(j <= 0)
+        if(j < 0)
             throw std::runtime_error("Identifier '" + assign->identifier + "' being reassigned on line " +
                                      std::to_string(assign->line_number) + " was never declared " +
                                      ((scopes.size() == 1) ? "globally." : "in this scope."));
@@ -252,7 +252,7 @@ void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {
 
     // Get the type of the originally declared variable
     parser::TYPE type = scopes[j]->type(assign->identifier);
-    if (assign->is_array) {
+    if (assign->is_array && !assign->require_input) {
         
         // Check if first position is available
         if (assign->first_position !=  nullptr) {
@@ -349,19 +349,28 @@ void SemanticAnalyser::visit(parser::ASTAssignmentNode *assign) {
                 break;
         }
     }
-    else{
-        // Visit the expression to update current type
-        assign->expr->accept(this);
+    else if (!assign->is_array){
+        if (assign->require_input) {
+            // Visit the expression to get input statement
+            assign->expr->accept(this);
+        }
+        else{
+            // Visit the expression to update current type
+            assign->expr->accept(this);
 
-        // allow mismatched type in the case of declaration of int to real
-        if (type == parser::REAL && current_expression_type == parser::INT) {}
+            // allow mismatched type in the case of declaration of int to real
+            if (type == parser::REAL && current_expression_type == parser::INT) {}
 
-        // otherwise throw error
-        else if (current_expression_type != type)
+            // otherwise throw error
+            else if (current_expression_type != type)
+                throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
+                                        std::to_string(assign->line_number) + ". Expected " + type_str(type) +
+                                        ", found " + type_str(current_expression_type) + ".");
+            }
+        }
+        else
             throw std::runtime_error("Mismatched type for '" + assign->identifier + "' on line " +
-                                    std::to_string(assign->line_number) + ". Expected " + type_str(type) +
-                                    ", found " + type_str(current_expression_type) + ".");
-    }
+                                        std::to_string(assign->line_number) + ". Input statements support non array types but found " + type_str(type) + ".");
 }
 
 
@@ -393,7 +402,7 @@ void SemanticAnalyser::visit(parser::ASTAppendNode* append)
     // Determine the inner-most scope in which the value is declared
     unsigned long j;
     for (j = scopes.size() - 1; !scopes[j] -> already_declared(append->identifier); j--)
-        if(j <= 0)
+        if(j < 0)
             throw std::runtime_error("Array '" + append->identifier + "' being appended on line " +
                                      std::to_string(append->line_number) + " was never declared " +
                                      ((scopes.size() == 1) ? "globally." : "in this scope."));
@@ -434,12 +443,13 @@ void SemanticAnalyser::visit(parser::ASTAppendNode* append)
         {
             if (current_expression_type != parser::STRING)
                 throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
-                                                std::to_string(append->line_number) + ". Expected to append" + type_str(parser::STRING) +
+                                                std::to_string(append->line_number) + ". Expected to append " + type_str(parser::STRING) +
                                             ", found expression of type " + type_str(current_expression_type) + ".");
             break;
         }
         default:
-            break;
+            throw std::runtime_error("Mismatched type for '" + append->identifier + "' on line " +
+                                                std::to_string(append->line_number) + ". Expected to append to arrays only.");
     }
     
 }
@@ -633,19 +643,21 @@ void SemanticAnalyser::visit(parser::ASTBinaryExprNode* bin) {
 
     // + works for all types except bool
     else if(op == "+") {
-        if(l_type == parser::BOOL || r_type == parser::BOOL)
+        
+        // If both string, no error
+        if(l_type == parser::STRING || r_type == parser::STRING)
+            current_expression_type = parser::STRING;
+            
+        else if(l_type == parser::BOOL || r_type == parser::BOOL)
             throw std::runtime_error("Invalid operand for '+' operator, expected numerical or string"
                                      " operand on line " + std::to_string(bin->line_number) + ".");
 
-        // If both string, no error
-        if(l_type == parser::STRING && r_type == parser::STRING)
-            current_expression_type = parser::STRING;
-
         // only one is string, error
-        else if(l_type == parser::STRING || r_type == parser::STRING)
+        // allow string and other type addtion
+        /*else if(l_type == parser::STRING || r_type == parser::STRING) 
             throw std::runtime_error("Mismatched operands for '+' operator, found " + type_str(l_type) +
                                      " on the left, but " + type_str(r_type) + " on the right (line " +
-                                      std::to_string(bin->line_number) + ").");
+                                      std::to_string(bin->line_number) + ").");*/
 
         // real/int possibilities remain. If both int, then result is int, otherwise result is real
         else
@@ -830,6 +842,8 @@ std::string type_str(parser::TYPE t) {
             return "bool[]";
         case parser::STRING_ARR:
             return "string[]";
+        case parser::FILE_:
+            return "file";
         default:
             throw std::runtime_error("Invalid type encountered.");
     }

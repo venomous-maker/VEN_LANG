@@ -19,7 +19,7 @@ Token::Token(int final_state, std::string value, unsigned int line_number) :
 {}
 
 TOKEN Token::determine_token_type(int final_state, std::string &value) {
-   // std::cout <<  final_state << std::endl;
+    //std::cout <<  "Value: '" << value << "' " << final_state << std::endl;
     switch(final_state) {
         case 1:
             return TOK_INT;
@@ -39,7 +39,6 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
                 return TOK_NOT;
             else
                 return TOK_MULTIPLICATIVE_OP;
-
         case 7:
             return TOK_RELATIONAL_OP;
 
@@ -47,6 +46,10 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
             return TOK_EQUALS;
 
         case 9:
+            if ( value == "= " || value == "=" || value == " =" ||  value == " = ") 
+                return TOK_EQUALS;
+            if (value == "#") 
+                return TOK_COMMENT;
             if (value ==  "$") 
                 return TOK_SET;
             else if (value == "[") 
@@ -101,6 +104,8 @@ TOKEN Token::determine_token_type(int final_state, std::string &value) {
                 return TOK_NOT;
             if (value == "append" || value ==  "push")
                 return TOK_APPEND;
+            if (value ==  "input")
+                return TOK_INPUT;
             else return TOK_IDENTIFIER;
 
         case 14:

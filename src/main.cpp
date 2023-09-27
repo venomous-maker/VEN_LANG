@@ -54,7 +54,7 @@ int main(int args, char* argv[]) {
         std::string arg = argv[args_];
     	if(arg=="-h" || arg =="--h" || arg=="--help" || arg == "-help") {help_menu(); break;}
         if (arg == "-xml" || arg == "--xml") global::generate_xml = true;
-    	if (args_+1 == args) {console_args(argv[1]);}
+    	if (args_+1 == args) {console_args(argv[args_]);}
          args_++;
         }
     }
@@ -224,15 +224,17 @@ int main(int args, char* argv[]) {
             }
 
             // Generate XML
-            visitor::XMLVisitor xml_generator;
-            xml_generator.visit(prog);
+            if (global::generate_xml) {
+                visitor::XMLVisitor xml_generator;
+                xml_generator.visit(prog);
+            }
 
 
             // Try to analyse in a temporary copy of the global scope (just in case
             // the program is invalid)
-            visitor::SemanticScope temp = global::semantic_global_scope;
-            visitor::SemanticAnalyser temp_semantic_analyser(&temp);
-            temp_semantic_analyser.visit(prog);
+            //visitor::SemanticScope temp = global::semantic_global_scope;
+            //visitor::SemanticAnalyser temp_semantic_analyser(&temp);
+            //temp_semantic_analyser.visit(prog);
 
             // If this succeeds, perform semantic analysis modifying global scope
             visitor::SemanticAnalyser semantic_analyser(&global::semantic_global_scope);

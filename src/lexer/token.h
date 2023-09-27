@@ -56,7 +56,8 @@ namespace lexer {
         TOK_RIGHT_SQUARE_BRACKET, 
         TOK_LEFT_SQUARE_BRACKET, 
         TOK_APPEND,
-        TOK_PERIOD
+        TOK_PERIOD,
+        TOK_INPUT
     };
 
     /**

@@ -33,6 +33,7 @@ namespace parser {
 			 ASTIncludeNode*             parse_include();
             // Statement Nodes
             ASTStatementNode*             parse_statement();
+            ASTStatementNode*             parse_identifier_statement();
             ASTDeclarationNode*           parse_declaration_statement();
             ASTAssignmentNode*            parse_assignment_statement();
             ASTPrintNode*                 parse_print_statement();
@@ -54,6 +55,11 @@ namespace parser {
             TYPE parse_type(std::string&);
             std::vector<ASTExprNode*> *parse_actual_params();
             std::pair<std::string, TYPE>* parse_formal_param();
+            
+            // Global controllers
+            bool assign_without_set_token = false;
+            std::string period_based_identifier;
+            int period_based_line_number;
 
     };
 
