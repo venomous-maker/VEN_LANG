@@ -1,0 +1,18 @@
+func int factorial(int k){
+    if( k is 0){
+        return 1;
+    }
+    else{
+        return (k * factorial(k - 1));
+    }
+}
+
+func int factorial_(int __min, int __max){
+    //print("Here" + __max);
+    if( __min is (__max+1)){
+        return 1;
+    }
+    else{
+        return (__min * factorial_(__min + 1, __max));
+    }
+}

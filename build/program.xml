@@ -1,0 +1,87 @@
+<program>
+    <func-def type = "int">
+        <id>factorial</id>
+        <param type = "int">k</param>
+        <block>
+            <if>
+                <condition>
+                    <bin op = "==">
+                        <id>k</id>
+                        <int>0</int>
+                    </bin>
+                </condition>
+                <if-block>
+                    <block>
+                        <return>
+                            <int>1</int>
+                        </return>
+                    </block>
+                </if-block>
+            <else-block>
+                <block>
+                    <return>
+                        <bin op = "*">
+                            <id>k</id>
+                            <func-call>
+                                <id>factorial</id>
+                                <arg>
+                                    <bin op = "-">
+                                        <id>k</id>
+                                        <int>1</int>
+                                    </bin>
+                                        </arg>
+                                    </func-call>
+                                </bin>
+                            </return>
+                        </block>
+                    </else-block>
+                    </if>
+                </block>
+            </func-def>
+            <func-def type = "int">
+                <id>factorial_</id>
+                <param type = "int">__min</param>
+                <param type = "int">__max</param>
+                <block>
+                    <if>
+                        <condition>
+                            <bin op = "==">
+                                <id>__min</id>
+                                <bin op = "+">
+                                    <id>__max</id>
+                                    <int>1</int>
+                                </bin>
+                            </bin>
+                        </condition>
+                        <if-block>
+                            <block>
+                                <return>
+                                    <int>1</int>
+                                </return>
+                            </block>
+                        </if-block>
+                    <else-block>
+                        <block>
+                            <return>
+                                <bin op = "*">
+                                    <id>__min</id>
+                                    <func-call>
+                                        <id>factorial_</id>
+                                        <arg>
+                                            <bin op = "+">
+                                                <id>__min</id>
+                                                <int>1</int>
+                                            </bin>
+                                                </arg>
+                                                <arg>
+                                                    <id>__max</id>
+                                                        </arg>
+                                                    </func-call>
+                                                </bin>
+                                            </return>
+                                        </block>
+                                    </else-block>
+                                    </if>
+                                </block>
+                            </func-def>
+                        </program>
