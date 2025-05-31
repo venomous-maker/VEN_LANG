@@ -1,3 +1,0 @@
-/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles/venom.dir
-/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles/edit_cache.dir
-/home/venom/Desktop/morgan/venom_interpreter/build/CMakeFiles/rebuild_cache.dir
